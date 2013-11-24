@@ -1,4 +1,4 @@
-﻿using App_Dominio.Control;
+﻿using App_Dominio.Component;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -9,7 +9,7 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 
-namespace App_Dominio.Control
+namespace App_Dominio.Component
 {
     public abstract class ListViewRepository<R> : Context, IListRepository where R : Repository
     {

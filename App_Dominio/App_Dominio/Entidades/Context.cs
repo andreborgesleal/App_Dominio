@@ -1,5 +1,5 @@
 ﻿using App_Dominio.Contratos;
-using App_Dominio.Control;
+using App_Dominio.Component;
 using App_Dominio.Enumeracoes;
 using App_Dominio.Security;
 using System;
@@ -14,6 +14,7 @@ namespace App_Dominio.Entidades
     public abstract class Context
     {
         public App_DominioContext db { get; set; }
+        public SecurityContext seguranca_db { get; set; }
         public App_DominioContext Create(App_DominioContext value)
         {
             this.db = value;
@@ -21,11 +22,19 @@ namespace App_Dominio.Entidades
             return db;
         }
 
+        public SecurityContext Create(SecurityContext value)
+        {
+            this.seguranca_db = value;
+
+            return seguranca_db;
+        }
+
         public App_DominioContext Create()
         {
             db = new App_DominioContext();
+            seguranca_db = new SecurityContext();
 
-            sessaoCorrente = db.Sessaos.Find(System.Web.HttpContext.Current.Session.SessionID);
+            sessaoCorrente = seguranca_db.Sessaos.Find(System.Web.HttpContext.Current.Session.SessionID);
 
             return db;
         }

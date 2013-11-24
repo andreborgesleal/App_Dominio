@@ -9,7 +9,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Linq;
 using System.Web;
 
-namespace App_Dominio.Control
+namespace App_Dominio.Component
 {
     public abstract class Repository
     {

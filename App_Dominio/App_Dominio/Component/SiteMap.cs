@@ -3,7 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 
 
-namespace App_Dominio.Control
+namespace App_Dominio.Component
 {
     public class BreadCrumbItem
     {

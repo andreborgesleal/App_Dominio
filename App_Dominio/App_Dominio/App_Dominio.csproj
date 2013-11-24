@@ -37,6 +37,8 @@
     <Reference Include="EntityFramework.SqlServer">
       <HintPath>..\packages\EntityFramework.6.0.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.ReportViewer.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
@@ -65,16 +67,34 @@
     <Compile Include="Contratos\IReportRepository.cs" />
     <Compile Include="Contratos\ISecurity.cs" />
     <Compile Include="Contratos\IValidate.cs" />
-    <Compile Include="Controller\SuperController.cs" />
-    <Compile Include="Control\ListViewRepository.cs" />
-    <Compile Include="Control\MiniCrud.cs" />
-    <Compile Include="Control\Repository.cs" />
-    <Compile Include="Control\SiteMap.cs" />
+    <Compile Include="Controllers\SuperController.cs" />
+    <Compile Include="Component\ListViewRepository.cs" />
+    <Compile Include="Component\MiniCrud.cs" />
+    <Compile Include="Component\Repository.cs" />
+    <Compile Include="Component\SiteMap.cs" />
+    <Compile Include="Entidades\Alerta.cs" />
     <Compile Include="Entidades\App_DominioContext.cs" />
     <Compile Include="Entidades\Context.cs" />
     <Compile Include="Entidades\Empresa.cs" />
     <Compile Include="Entidades\Filtro.cs" />
+    <Compile Include="Entidades\Grupo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entidades\GrupoTransacao.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entidades\SecurityContext.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Entidades\Sessao.cs" />
+    <Compile Include="Entidades\Sistema.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entidades\Transacao.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Entidades\Usuario.cs" />
+    <Compile Include="Entidades\UsuarioGrupo.cs" />
     <Compile Include="Enumeracoes\BindDropDownList.cs" />
     <Compile Include="Enumeracoes\Constantes.cs" />
     <Compile Include="Enumeracoes\MensagemPadrao.cs" />
@@ -84,6 +104,7 @@
     <Compile Include="Repositories\FiltroRepository.cs" />
     <Compile Include="Repositories\TypeaheadRepository.cs" />
     <Compile Include="Security\App_DominioException.cs" />
+    <Compile Include="Security\EmpresaSecurity.cs" />
     <Compile Include="Security\LogAuditoria.cs" />
   </ItemGroup>
   <ItemGroup />

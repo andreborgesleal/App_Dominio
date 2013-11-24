@@ -15,9 +15,11 @@ namespace App_Dominio.Entidades
 
         public int sistemaId { get; set; }
 
-        public int usuarioId { get; set; }
+        public decimal usuarioId { get; set; }
 
         public int empresaId { get; set; }
+
+        public string login { get; set; }
 
         [DisplayName("Dt.Ativação")]
         [Required(ErrorMessage = "Data de ativação da sessão deve ser informada")]

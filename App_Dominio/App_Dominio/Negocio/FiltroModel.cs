@@ -1,5 +1,5 @@
 ﻿using App_Dominio.Contratos;
-using App_Dominio.Control;
+using App_Dominio.Component;
 using App_Dominio.Entidades;
 using App_Dominio.Enumeracoes;
 using App_Dominio.Repositories;

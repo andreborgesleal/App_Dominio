@@ -1,13 +1,11 @@
-﻿//using BootstrapSupport;
-using App_Dominio.Contratos;
-using App_Dominio.Control;
+﻿using App_Dominio.Contratos;
+using App_Dominio.Component;
 using App_Dominio.Entidades;
 using App_Dominio.Enumeracoes;
 using App_Dominio.Negocio;
-//using App_Dominio.Report;
 using App_Dominio.Repositories;
 using App_Dominio.Security;
-//using Microsoft.Reporting.WebForms;
+using Microsoft.Reporting.WebForms;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +14,19 @@ using System.Web.Mvc;
 
 namespace App_Dominio.Controllers
 {
+    public static class Alerts
+    {
+        public const string SUCCESS = "success";
+        public const string ATTENTION = "attention";
+        public const string ERROR = "error";
+        public const string INFORMATION = "info";
+
+        public static string[] ALL
+        {
+            get { return new[] { SUCCESS, ATTENTION, INFORMATION, ERROR }; }
+        }
+    }
+
     public abstract class SuperController : Controller
     {
         protected System.Data.Common.DbTransaction trans = null;
@@ -24,10 +35,15 @@ namespace App_Dominio.Controllers
 
         #region Segurança
 
-        protected bool AccessDenied(string sessionId)
+        protected bool AccessDenied(string sessionId = null)
         {
-            EmpresaSecurity l = new EmpresaSecurity();
-            return !l.validarSessao(sessionId);
+            if (sessionId == null)
+            { 
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                sessionId = web.Session.SessionID;
+            }
+            EmpresaSecurity security = new EmpresaSecurity();
+            return !security.ValidarSessao(sessionId);
         }
         #endregion
 
@@ -152,12 +168,12 @@ namespace App_Dominio.Controllers
 
                     value = model.Insert(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro incluído com sucesso");
                     return RedirectToAction("Create");
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
@@ -167,7 +183,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -201,12 +217,12 @@ namespace App_Dominio.Controllers
 
                     value = model.Update(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro alterado com sucesso");
                     return RedirectToAction("Edit", value);
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
@@ -216,7 +232,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -251,12 +267,12 @@ namespace App_Dominio.Controllers
 
                     value = model.Delete(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro excluído com sucesso");
                     return RedirectToAction("Browse");
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
@@ -266,7 +282,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -377,8 +393,6 @@ namespace App_Dominio.Controllers
             TempData.Add("breadcrumb", caminhoPao);
             ViewBag.BreadCrumb = (BreadCrumb)TempData.Peek("breadcrumb");
         }
-
-
         #endregion
 
         #region Parâmetros de pesquisa
@@ -392,9 +406,9 @@ namespace App_Dominio.Controllers
                 int empresaId = empresa.getSessaoCorrente().empresaId;
                 result = model.SaveCollection(values, info => info.report == f.report && info.controller == f.controller && info.action == f.action && info.empresaId == empresaId);
                 if (result.Code > 0)
-                    throw new FinancasException(result);
+                    throw new App_DominioException(result);
             }
-            catch (FinancasException ex)
+            catch (App_DominioException ex)
             {
                 ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                 if (ex.Result.MessageType == MsgType.ERROR)
@@ -404,7 +418,7 @@ namespace App_Dominio.Controllers
             }
             catch (Exception ex)
             {
-                FinancasException.saveError(ex, GetType().FullName);
+                App_DominioException.saveError(ex, GetType().FullName);
                 ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                 Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
             }
@@ -597,11 +611,11 @@ namespace App_Dominio.Controllers
 
                     value = model.Insert(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro incluído com sucesso");
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
 
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
@@ -612,7 +626,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -686,11 +700,11 @@ namespace App_Dominio.Controllers
 
                     value = model.Update(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro alterado com sucesso");
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
@@ -700,7 +714,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -760,11 +774,11 @@ namespace App_Dominio.Controllers
 
                     value = model.Delete(value);
                     if (value.mensagem.Code > 0)
-                        throw new FinancasException(value.mensagem);
+                        throw new App_DominioException(value.mensagem);
 
                     Success("Registro excluído com sucesso");
                 }
-                catch (FinancasException ex)
+                catch (App_DominioException ex)
                 {
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
@@ -774,7 +788,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
-                    FinancasException.saveError(ex, GetType().FullName);
+                    App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }
@@ -831,15 +845,15 @@ namespace App_Dominio.Controllers
 
                 value = model.Insert(value);
                 if (value.mensagem.Code > 0)
-                    throw new FinancasException(value.mensagem);
+                    throw new App_DominioException(value.mensagem);
             }
-            catch (FinancasException ex)
+            catch (App_DominioException ex)
             {
                 ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
             }
             catch (Exception ex)
             {
-                FinancasException.saveError(ex, GetType().FullName);
+                App_DominioException.saveError(ex, GetType().FullName);
                 ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
             }
 
@@ -1096,7 +1110,7 @@ namespace App_Dominio.Controllers
                 }
 
                 if (value.mensagem.Code > 0)
-                    throw new FinancasException(value.mensagem);
+                    throw new App_DominioException(value.mensagem);
 
                 master.SetItems(model.ListAll());
 
@@ -1107,14 +1121,14 @@ namespace App_Dominio.Controllers
 
                 return View(master);
             }
-            catch (FinancasException ex)
+            catch (App_DominioException ex)
             {
                 ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                 Information(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
             }
             catch (Exception ex)
             {
-                FinancasException.saveError(ex, GetType().FullName);
+                App_DominioException.saveError(ex, GetType().FullName);
                 ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                 Information(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
             }

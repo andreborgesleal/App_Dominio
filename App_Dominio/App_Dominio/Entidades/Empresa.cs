@@ -25,10 +25,5 @@ namespace App_Dominio.Entidades
         [Required(ErrorMessage = "Por favor, informe o e-mail")]
         [RegularExpression(".+\\@.+\\..+", ErrorMessage = "E-mail inválido.")]
         public string email { get; set; }
-
-        [DisplayName("Senha")]
-        [Required(ErrorMessage = "Por favor, informe a senha")]
-        [StringLength(20, ErrorMessage = "A senha deve ter no máximo 20 caracteres")]
-        public string senha { get; set; }
     }
 }

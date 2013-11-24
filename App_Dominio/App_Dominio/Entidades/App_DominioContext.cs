@@ -17,7 +17,6 @@ namespace App_Dominio.Entidades
             : base("Name=App_DominioContext")
 		{
 		}
-        public DbSet<Sessao> Sessaos { get; set; }
         public DbSet<Filtro> Filtros { get; set; }
 
     }
