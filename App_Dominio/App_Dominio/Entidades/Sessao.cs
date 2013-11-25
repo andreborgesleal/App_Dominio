@@ -23,7 +23,7 @@ namespace App_Dominio.Entidades
 
         [DisplayName("Dt.Ativação")]
         [Required(ErrorMessage = "Data de ativação da sessão deve ser informada")]
-        public DateTime dt_ativacao { get; set; }
+        public DateTime dt_criacao { get; set; }
 
         [DisplayName("Dt.Atualização")]
         [Required(ErrorMessage = "Data da atualização da sessão deve ser informada")]

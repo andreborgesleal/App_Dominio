@@ -18,7 +18,7 @@ namespace App_Dominio.Controllers
     {
         public const string SUCCESS = "success";
         public const string ATTENTION = "attention";
-        public const string ERROR = "error";
+        public const string ERROR = "danger";
         public const string INFORMATION = "info";
 
         public static string[] ALL

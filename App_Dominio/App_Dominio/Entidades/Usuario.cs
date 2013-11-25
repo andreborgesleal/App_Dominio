@@ -28,7 +28,7 @@ namespace App_Dominio.Entidades
 
         public string keyword { get; set; }
 
-        public DateTime dt_keyword { get; set; }
+        public Nullable<DateTime> dt_keyword { get; set; }
 
         public virtual Empresa empresa { get; set;}
     }
