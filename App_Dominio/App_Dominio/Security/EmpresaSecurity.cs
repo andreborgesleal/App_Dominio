@@ -130,9 +130,9 @@ namespace App_Dominio.Security
                         sessao.value3 = value3;
                         sessao.value4 = value4;
 
-                        db.Entry(sessao).State = System.Data.Entity.EntityState.Modified;
+                        seguranca_db.Entry(sessao).State = System.Data.Entity.EntityState.Modified;
                     }
-                    db.SaveChanges();
+                    seguranca_db.SaveChanges();
                     validate.Field = web.Session.SessionID;
                     #endregion
                 }            
@@ -188,8 +188,8 @@ namespace App_Dominio.Security
                         #region Atualiza a sessão
                         sessaoCorrente = seguranca_db.Sessaos.Find(sessionId);
                         sessaoCorrente.dt_atualizacao = DateTime.Now;
-                        db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
+                        seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
+                        seguranca_db.SaveChanges();
                         #endregion
                     }
                 }
@@ -217,8 +217,8 @@ namespace App_Dominio.Security
                     {
                         sessaoCorrente.dt_atualizacao = DateTime.Now;
                         sessaoCorrente.dt_desativacao = DateTime.Now;
-                        db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
+                        seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
+                        seguranca_db.SaveChanges();
                     }
                     #endregion
                 }
@@ -229,15 +229,129 @@ namespace App_Dominio.Security
             }
         }
 
+        #region getSessaoCorrente
+        public Sessao _getSessaoCorrente()
+        {
+            System.Web.HttpContext web = System.Web.HttpContext.Current;
+            if (_ValidarSessao(web.Session.SessionID))
+                return seguranca_db.Sessaos.Find(web.Session.SessionID);
+            else
+                return null;
+        }
         public Sessao getSessaoCorrente()
         {
             using (seguranca_db = new SecurityContext())
+                return _getSessaoCorrente();
+        }
+        #endregion
+
+        #region Retorna a empresa do usuário da sessão corrente
+        public Empresa getEmpresa()
+        {
+            using (seguranca_db = seguranca_db ?? new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
-                sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
-                return this.sessaoCorrente;
+                if (ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                    return seguranca_db.Empresas.Find(this.sessaoCorrente.empresaId);
+                }
+                else
+                    return null;
             }
         }
+        #endregion
+
+        #region retorna o Usuário da sessão corrente
+        public Usuario getUsuario()
+        {
+            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                    return seguranca_db.Usuarios.Find(this.sessaoCorrente.usuarioId);
+                }
+                else
+                    return null;
+            }
+        }
+        #endregion
+
+        #region Retorna os Alertas não lidos do usuário da sessão corrente
+        public IEnumerable<Alerta> getAlertasNaoLidos()
+        {
+            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    IEnumerable<Alerta> q = from a in seguranca_db.Alertas
+                                            where a.usuarioId == sessaoCorrente.usuarioId
+                                                    && a.dt_leitura == null
+                                            select a;
+                    return q;
+                }
+                else
+                    return null;
+            }
+        }
+        #endregion
+
+        #region Retorna os grupos de um dado usuário
+        public IEnumerable<Grupo> getUsuarioGrupo(decimal? usuarioId = null)
+        {
+            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (ValidarSessao(web.Session.SessionID))
+                {
+                    if (!usuarioId.HasValue)
+                    {
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        usuarioId = sessaoCorrente.usuarioId;
+                    }
+
+                    IEnumerable<Grupo> q = from a in seguranca_db.UsuarioGrupos
+                                           where a.usuarioId == usuarioId && a.situacao == "A"
+                                           select a.grupo;
+                    return q;
+                }
+                else
+                    return null;
+            }
+        }
+        #endregion
+
+        #region Retorna as transações de um dado usuário
+        public IEnumerable<Transacao> getUsuarioTransacao(decimal? usuarioId = null)
+        {
+            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (ValidarSessao(web.Session.SessionID))
+                {
+                    if (!usuarioId.HasValue)
+                    {
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        usuarioId = sessaoCorrente.usuarioId;
+                    }
+
+                    IEnumerable<Transacao> t = (from a in seguranca_db.UsuarioGrupos
+                                                join b in seguranca_db.GrupoTransacaos on a.grupoId equals b.grupoId
+                                                join c in seguranca_db.Transacaos on b.transacaoId equals c.transacaoId
+                                                where a.usuarioId == usuarioId && a.situacao == "A" && b.situacao == "A"
+                                                select c).Distinct();
+                    return t;
+                }
+                else
+                    return null;
+            }
+        }
+        #endregion
 
     }
 }
