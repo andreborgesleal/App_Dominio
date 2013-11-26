@@ -31,5 +31,6 @@ namespace App_Dominio.Entidades
         public Nullable<DateTime> dt_keyword { get; set; }
 
         public virtual Empresa empresa { get; set;}
+
     }
 }
