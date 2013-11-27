@@ -40,7 +40,7 @@ namespace App_Dominio.Security
             {
                 #region Recupera o usuário
                 senha = Criptografar(senha);
-                Usuario usu = (from u in seguranca_db.Usuarios where u.login == usuario && u.senha == senha && u.situacao == "A" select u).First();
+                Usuario usu = (from u in seguranca_db.Usuarios where u.login == usuario && u.senha == senha && u.situacao == "A" select u).FirstOrDefault();
                 #endregion
 
                 #region autenticar usuário
