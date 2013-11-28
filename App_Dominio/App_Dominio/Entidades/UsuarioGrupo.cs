@@ -14,7 +14,7 @@ namespace App_Dominio.Entidades
         [Key, Column(Order = 1)]
         [DisplayName("ID Grupo")]
         public int grupoId { get; set; }
-        public string  situacao { get; set; }
+        public string situacao { get; set; }
         public virtual Usuario usuario { get; set; }
         public virtual Grupo grupo { get; set; }
     }

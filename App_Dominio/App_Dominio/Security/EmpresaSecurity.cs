@@ -1,6 +1,7 @@
 ﻿using App_Dominio.Contratos;
 using App_Dominio.Entidades;
 using App_Dominio.Enumeracoes;
+using App_Dominio.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -251,7 +252,7 @@ namespace App_Dominio.Security
             using (seguranca_db = seguranca_db ?? new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
-                if (ValidarSessao(web.Session.SessionID))
+                if (_ValidarSessao(web.Session.SessionID))
                 {
                     sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
                     return seguranca_db.Empresas.Find(this.sessaoCorrente.empresaId);
@@ -268,7 +269,7 @@ namespace App_Dominio.Security
             using (seguranca_db = seguranca_db ?? new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
-                if (ValidarSessao(web.Session.SessionID))
+                if (_ValidarSessao(web.Session.SessionID))
                 {
                     sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
                     return seguranca_db.Usuarios.Find(this.sessaoCorrente.usuarioId);
@@ -327,28 +328,85 @@ namespace App_Dominio.Security
         #endregion
 
         #region Retorna as transações de um dado usuário
-        public IEnumerable<Transacao> getUsuarioTransacao(decimal? usuarioId = null)
+        public IEnumerable<TransacaoRepository> getUsuarioTransacao(decimal? usuarioId = null)
         {
-            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            using (seguranca_db = new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
-                if (ValidarSessao(web.Session.SessionID))
+                if (_ValidarSessao(web.Session.SessionID))
                 {
-                    if (!usuarioId.HasValue)
-                    {
-                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
-                        usuarioId = sessaoCorrente.usuarioId;
-                    }
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                    IEnumerable<Transacao> t = (from a in seguranca_db.UsuarioGrupos
-                                                join b in seguranca_db.GrupoTransacaos on a.grupoId equals b.grupoId
-                                                join c in seguranca_db.Transacaos on b.transacaoId equals c.transacaoId
-                                                where a.usuarioId == usuarioId && a.situacao == "A" && b.situacao == "A"
-                                                select c).Distinct();
-                    return t;
+                    if (!usuarioId.HasValue)
+                        usuarioId = sessaoCorrente.usuarioId;
+
+                    try
+                    {
+                        IEnumerable<TransacaoRepository> t = (from a in seguranca_db.UsuarioGrupos
+                                                              join b in seguranca_db.GrupoTransacaos on a.grupoId equals b.grupoId
+                                                              join c in seguranca_db.Transacaos on b.transacaoId equals c.transacaoId
+                                                              join d in seguranca_db.Grupos on a.grupoId equals d.grupoId
+                                                              where a.usuarioId == usuarioId && a.situacao == "A" && b.situacao == "A" && d.sistemaId == sessaoCorrente.sistemaId
+                                                              orderby c.transacaoId_pai, c.posicao
+                                                              select new TransacaoRepository()
+                                                              {
+                                                                  transacaoId = c.transacaoId,
+                                                                  transacaoId_pai = c.transacaoId_pai,
+                                                                  sistemaId = c.sistemaId,
+                                                                  nomeCurto = c.nomeCurto,
+                                                                  nome = c.nome,
+                                                                  descricao = c.descricao,
+                                                                  referencia = c.referencia,
+                                                                  exibir = c.exibir,
+                                                                  posicao = c.posicao,
+                                                                  url = c.url,
+                                                                  glyph = c.glyph
+                                                              }).Distinct();
+                        return t.ToList();
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
                 }
                 else
                     return null;
+            }
+        }
+        #endregion
+
+        #region Retorna os Grupos que podem acessar uma determinada transação
+        public string[] getGruposByTransacao(string url)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (_ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    try
+                    {
+                        return (from a in seguranca_db.GrupoTransacaos
+                                join b in seguranca_db.Transacaos on a.transacaoId equals b.transacaoId
+                                where b.url == url
+                                select a.grupoId.ToString()).ToList().ToArray();
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                }
+                else
+                    return new string[] { };
             }
         }
         #endregion

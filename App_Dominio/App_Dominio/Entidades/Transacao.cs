@@ -12,13 +12,15 @@ namespace App_Dominio.Entidades
         [DisplayName("ID Transação")]
         public int transacaoId { get; set; }
         public int sistemaId { get; set; }
-        public int transacaoId_pai { get; set; }
+        public Nullable<int> transacaoId_pai { get; set; }
+        public string nomeCurto { get; set; }
         public string nome { get; set; }
         public string descricao { get; set; }
         public string referencia { get; set; }
         public string exibir { get; set; }
-        public int posicao { get; set; }
+        public Nullable<int> posicao { get; set; }
         public string url { get; set; }
+        public string glyph { get; set; }
         public virtual Sistema sistema { get; set; }
         public virtual Transacao transacao { get; set; }
     }
