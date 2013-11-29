@@ -46,6 +46,7 @@
     <Reference Include="System.Data.Linq" />
     <Reference Include="System.Security" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Xml.Linq" />
@@ -104,12 +105,15 @@
     <Compile Include="Repositories\FiltroRepository.cs" />
     <Compile Include="Repositories\TransacaoRepository.cs" />
     <Compile Include="Repositories\TypeaheadRepository.cs" />
-    <Compile Include="Security\AccessAttribute.cs">
+    <Compile Include="Security\AccessRole.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Security\App_DominioException.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
     <Compile Include="Security\LogAuditoria.cs" />
+    <Compile Include="Security\PermissionFilter.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
