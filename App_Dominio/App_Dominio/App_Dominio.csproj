@@ -41,6 +41,7 @@
     <Reference Include="Microsoft.ReportViewer.WebForms, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.Entity" />
     <Reference Include="System.Data.Linq" />
@@ -103,17 +104,16 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ButtonRepository.cs" />
     <Compile Include="Repositories\FiltroRepository.cs" />
-    <Compile Include="Repositories\TransacaoRepository.cs" />
-    <Compile Include="Repositories\TypeaheadRepository.cs" />
-    <Compile Include="Security\AccessRole.cs">
+    <Compile Include="Repositories\TransacaoRepository.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Repositories\TypeaheadRepository.cs" />
     <Compile Include="Security\App_DominioException.cs" />
+    <Compile Include="Security\AuthorizeFilter.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Security\EmpresaSecurity.cs" />
     <Compile Include="Security\LogAuditoria.cs" />
-    <Compile Include="Security\PermissionFilter.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -17,5 +17,8 @@ namespace App_Dominio.Entidades
         public int transacaoId { get; set; }
         
         public string situacao { get; set; }
+
+        public virtual Grupo Grupo { get; set; }
+        public virtual Transacao Transacao { get; set; }
     }
 }

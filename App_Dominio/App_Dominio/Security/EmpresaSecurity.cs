@@ -34,14 +34,17 @@ namespace App_Dominio.Security
         }
         
         #region Autenticar
-        private Validate _Autenticar(string usuario, string senha)
+        private Validate _Autenticar(string usuario, string senha, int sistemaId)
         {
             Validate validate = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
             try
             {
                 #region Recupera o usuário
                 senha = Criptografar(senha);
-                Usuario usu = (from u in seguranca_db.Usuarios where u.login == usuario && u.senha == senha && u.situacao == "A" select u).FirstOrDefault();
+                Usuario usu = (from u in seguranca_db.Usuarios join usg in seguranca_db.UsuarioGrupos on u equals usg.Usuario
+                               join g in seguranca_db.Grupos on usg.Grupo equals g
+                               where u.login == usuario && u.senha == senha && u.situacao == "A" && g.sistemaId == sistemaId
+                               select u).FirstOrDefault();
                 #endregion
 
                 #region autenticar usuário
@@ -65,10 +68,10 @@ namespace App_Dominio.Security
             }
             return validate;
         }
-        public Validate Autenticar(string usuario, string senha)
+        public Validate Autenticar(string usuario, string senha, int sistemaId)
         {
             using (seguranca_db = new SecurityContext())
-                return _Autenticar(usuario, senha);
+                return _Autenticar(usuario, senha, sistemaId);
         }
         #endregion
         
@@ -85,7 +88,7 @@ namespace App_Dominio.Security
                 using (seguranca_db = new SecurityContext())
                 {
                     #region Autenticar usuário
-                    validate = _Autenticar(usuario, senha);
+                    validate = _Autenticar(usuario, senha, sistemaId);
                     if (validate.Code > 0)
                         return validate;
                     Usuario usu = seguranca_db.Usuarios.Find(int.Parse(validate.Field));
@@ -177,23 +180,27 @@ namespace App_Dominio.Security
         }
         #endregion
 
-        public Validate AtualizarSessao(string sessionId)
+        #region Atualizar Sessão
+        public Validate _AtualizarSessao(string sessionId)
         {
             Validate validate = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
             try
             {
-                using (seguranca_db = new SecurityContext())
+                if (_ValidarSessao(sessionId))
                 {
-                    if (_ValidarSessao(sessionId))
-                    {
-                        #region Atualiza a sessão
-                        sessaoCorrente = seguranca_db.Sessaos.Find(sessionId);
-                        sessaoCorrente.dt_atualizacao = DateTime.Now;
-                        seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
-                        seguranca_db.SaveChanges();
-                        #endregion
-                    }
+                    #region Atualiza a sessão
+                    sessaoCorrente = seguranca_db.Sessaos.Find(sessionId);
+                    sessaoCorrente.dt_atualizacao = DateTime.Now;
+                    seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
+                    seguranca_db.SaveChanges();
+                    #endregion
                 }
+                else
+                {
+                    validate.Code = 200;
+                    validate.Message = MensagemPadrao.Message(200).ToString();
+                }
+                    
             }
             catch (DbEntityValidationException ex)
             {
@@ -205,6 +212,12 @@ namespace App_Dominio.Security
             }
             return validate;
         }
+        public Validate AtualizarSessao(string sessionId)
+        {
+            using (seguranca_db = new SecurityContext())
+                return _AtualizarSessao(sessionId);
+        }
+        #endregion
 
         public void EncerrarSessao(string sessionId)
         {
@@ -318,7 +331,7 @@ namespace App_Dominio.Security
 
                     IEnumerable<Grupo> q = from a in seguranca_db.UsuarioGrupos
                                            where a.usuarioId == usuarioId && a.situacao == "A"
-                                           select a.grupo;
+                                           select a.Grupo;
                     return q;
                 }
                 else
@@ -380,7 +393,7 @@ namespace App_Dominio.Security
         #endregion
 
         #region Retorna os Grupos que podem acessar uma determinada transação
-        public string[] getGruposByTransacao(string url)
+        public string getGruposByTransacao(string url)
         {
             using (seguranca_db = new SecurityContext())
             {
@@ -391,10 +404,54 @@ namespace App_Dominio.Security
 
                     try
                     {
-                        return (from a in seguranca_db.GrupoTransacaos
-                                join b in seguranca_db.Transacaos on a.transacaoId equals b.transacaoId
-                                where b.url == url
-                                select a.grupoId.ToString()).ToList().ToArray();
+                        var x = (from a in seguranca_db.GrupoTransacaos
+                                 join b in seguranca_db.Transacaos on a.Transacao equals b
+                                 join c in seguranca_db.Grupos on a.Grupo equals c
+                                 where b.url == url && b.sistemaId == sessaoCorrente.sistemaId && c.empresaId == sessaoCorrente.empresaId
+                                 select c.descricao).ToList().ToArray();
+                        
+                        var resultado = "";
+
+                        if (x.Count() > 0)
+                            resultado = x[0];
+
+                        for (int i = 1; i <= x.Count() - 1; i++)
+                        {
+                            resultado += ", " + x[i];
+                        }
+
+                        return resultado;
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                }
+                else
+                    return "";
+            }
+        }
+
+        public string[] getGruposByCurrentUser()
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (_ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    try
+                    {
+                        return (from a in seguranca_db.UsuarioGrupos
+                                join b in seguranca_db.Grupos on a.Grupo equals b
+                                join c in seguranca_db.Usuarios on a.Usuario equals c
+                                where c.login == sessaoCorrente.login && b.sistemaId == sessaoCorrente.sistemaId && c.empresaId == sessaoCorrente.empresaId && b.empresaId == sessaoCorrente.empresaId
+                                select b.descricao).ToList().ToArray();
                     }
                     catch (DbEntityValidationException ex)
                     {
@@ -409,6 +466,48 @@ namespace App_Dominio.Security
                     return new string[] { };
             }
         }
+        #endregion
+
+        #region Retorna se o usuário corrente está autorizado a acessar uma dada URL
+        public bool AccessDenied(string url)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (_ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    try
+                    {
+                        if (_AtualizarSessao(web.Session.SessionID).Code > 0)
+                            return true;
+
+                        var x = (from gtr in seguranca_db.GrupoTransacaos
+                                 join tra in seguranca_db.Transacaos on gtr.Transacao equals tra
+                                 join gru in seguranca_db.Grupos on gtr.Grupo equals gru
+                                 join ugr in seguranca_db.UsuarioGrupos on gru equals ugr.Grupo
+                                 join usu in seguranca_db.Usuarios on ugr.Usuario equals usu
+                                 where tra.url == url && tra.sistemaId == sessaoCorrente.sistemaId && gru.empresaId == sessaoCorrente.empresaId && usu.usuarioId == sessaoCorrente.usuarioId
+                                 select usu).ToList();
+
+                        return x == null;
+                    }
+                    catch (DbEntityValidationException ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new App_DominioException(ex.Message, GetType().FullName);
+                    }
+                }
+                else
+                    return true;
+            }
+
+        }
+
         #endregion
 
     }

@@ -10,7 +10,7 @@ namespace App_Dominio.Contratos
     public interface ISecurity
     {
         string Criptografar(string value);
-        Validate Autenticar(string login, string senha);
+        Validate Autenticar(string login, string senha, int sistemaId);
         Validate Autorizar(string usuario, string senha, int sistemaId, params object[] param);
         bool ValidarSessao(string sessionId);
         Validate AtualizarSessao(string sessionId);
