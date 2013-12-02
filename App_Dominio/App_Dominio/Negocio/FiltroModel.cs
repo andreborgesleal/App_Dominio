@@ -42,7 +42,7 @@ namespace App_Dominio.Negocio
 
         public override Filtro Find(FiltroRepository key)
         {
-            return db.Filtros.Find(key.report, key.controller, key.action, key.atributo, key.empresaId);
+            return default_db.Filtros.Find(key.report, key.controller, key.action, key.atributo, key.empresaId);
         }
 
         public override Validate Validate(FiltroRepository value, Crud operation)
@@ -74,9 +74,9 @@ namespace App_Dominio.Negocio
         #region Métodos customizados
         public string getReport(string report, string controller, string action)
         {
-            using (db = base.Create())
+            using (default_db = base.CreateContext())
             {
-                Filtro f = db.Filtros.Where(info => info.report == report && info.controller == controller && info.action == action && info.empresaId == sessaoCorrente.empresaId).FirstOrDefault();
+                Filtro f = default_db.Filtros.Where(info => info.report == report && info.controller == controller && info.action == action && info.empresaId == sessaoCorrente.empresaId).FirstOrDefault();
                 if (f == null)
                     report = "_default";
             }
@@ -95,7 +95,7 @@ namespace App_Dominio.Negocio
             string _controller = param[1].ToString() ;
             string _action = param[2].ToString();
 
-            return (from f in db.Filtros
+            return (from f in default_db.Filtros
                     where f.report == _report
                           && f.controller == _controller
                           && f.action == _action
@@ -110,7 +110,7 @@ namespace App_Dominio.Negocio
                         empresaId = sessaoCorrente.empresaId,
                         valor = f.valor,
                         PageSize = pageSize,
-                        TotalCount = (from f1 in db.Filtros
+                        TotalCount = (from f1 in default_db.Filtros
                                       where f1.report == _report
                                             && f1.controller == _controller
                                             && f1.action == _action
@@ -138,7 +138,7 @@ namespace App_Dominio.Negocio
             _report = param[0] != null && param[0].ToString() != "" ? param[0].ToString() : _report;
             _controller = param[1] != null && param[1].ToString() != "" ? param[1].ToString() : _controller;
 
-            return (from f in db.Filtros
+            return (from f in default_db.Filtros
                     where f.report.StartsWith(_report)
                           && f.controller == _controller
                           //&& f.action == _action
@@ -173,7 +173,7 @@ namespace App_Dominio.Negocio
             
             _report = param[0] != null && param[0].ToString() != "" ? param[0].ToString() : _report;
 
-            return (from f in db.Filtros
+            return (from f in default_db.Filtros
                     where (_report == null || f.report == _report)
                           && f.controller == _controller
                           && f.action == _action

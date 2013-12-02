@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace App_Dominio.Repositories
 {
+
     public class TransacaoRepository
     {
         public int transacaoId { get; set; }

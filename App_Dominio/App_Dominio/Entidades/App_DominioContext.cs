@@ -6,7 +6,7 @@ using System.Text;
 
 namespace App_Dominio.Entidades
 {
-    public sealed class App_DominioContext : DbContext
+    public class App_DominioContext : DbContext
     {
         static App_DominioContext()
         {

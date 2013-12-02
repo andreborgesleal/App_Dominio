@@ -103,9 +103,12 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ButtonRepository.cs" />
     <Compile Include="Repositories\FiltroRepository.cs" />
-    <Compile Include="Repositories\TransacaoRepository.cs" />
+    <Compile Include="Repositories\TransacaoRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Repositories\TypeaheadRepository.cs" />
     <Compile Include="Security\App_DominioException.cs" />
+    <Compile Include="Security\AuthorizeFilter.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
     <Compile Include="Security\LogAuditoria.cs" />
   </ItemGroup>

@@ -51,7 +51,7 @@ namespace App_Dominio.Component
 
         public virtual IEnumerable<Repository> ListRepository(int? index, int pageSize = 50, params object[] param)
         {
-            using (db = this.Create())
+            using (default_db = this.CreateContext())
             {
                 return Bind(index, pageSize, param);
             }
@@ -89,7 +89,7 @@ namespace App_Dominio.Component
 
         public override IEnumerable<Repository> ListRepository(int? index, int pageSize = 50, params object[] param)
         {
-            using (db = this.Create())
+            using (default_db = this.CreateContext())
             {
                 IEnumerable<R> r = Bind(index, pageSize, param);
                 if (r.Count() > 0)
@@ -101,7 +101,7 @@ namespace App_Dominio.Component
 
         public IEnumerable<R> ListReportRepository(params object[] param)
         {
-            using (db = this.Create())
+            using (default_db = this.CreateContext())
             {
                 IEnumerable<R> r = BindReport(param);
                 return r;

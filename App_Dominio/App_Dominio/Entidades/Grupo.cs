@@ -15,7 +15,7 @@ namespace App_Dominio.Entidades
         public int empresaId { get; set; }
         public string descricao { get; set; }
         public string situacao { get; set; }
-        public virtual Sistema sistema { get; set; }
-        public virtual Empresa empresa{ get; set; }
+        public virtual Sistema Sistema { get; set; }
+        public virtual Empresa Empresa{ get; set; }
     }
 }

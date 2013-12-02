@@ -34,16 +34,13 @@ namespace App_Dominio.Controllers
         protected Validate result { get; set; }
 
         #region Segurança
-
-        protected bool AccessDenied(string sessionId = null)
+        protected bool AccessDenied(string url = null)
         {
-            if (sessionId == null)
-            { 
-                System.Web.HttpContext web = System.Web.HttpContext.Current;
-                sessionId = web.Session.SessionID;
-            }
             EmpresaSecurity security = new EmpresaSecurity();
-            return !security.ValidarSessao(sessionId);
+            if (url != null)
+                return security.AccessDenied(url);
+            else
+                return security.AccessDenied(this.ControllerContext.RouteData.Values["controller"].ToString() + "/" + this.ControllerContext.RouteData.Values["action"].ToString());
         }
         #endregion
 
@@ -99,10 +96,11 @@ namespace App_Dominio.Controllers
             return f.getReport(report, controller, action);
         }
 
+        [AuthorizeFilter]
         public virtual ActionResult Browse(int? index = 0, int pageSize = 50, string descricao = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             BindBreadCrumb(getListName(), true);
 
@@ -112,10 +110,11 @@ namespace App_Dominio.Controllers
             return List(index, this.PageSize, descricao);
         }
 
+        [AuthorizeFilter]
         public ActionResult _List(int? index, int? pageSize, string report, string action, IListRepository model, params object[] param)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             IPagedList pagedList = model.getPagedList(index, report, this.ControllerContext.RouteData.Values["controller"].ToString(), action, pageSize.Value, param);
 
@@ -127,11 +126,11 @@ namespace App_Dominio.Controllers
             return View(pagedList);
         }
 
+        [AuthorizeFilter]
         public ActionResult _List(int? index, int? pageSize, string report, string action, IListRepository model, IMiniCrud miniCrud, params object[] param)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
-
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             IPagedList pagedList = model.getPagedList(index, report, this.ControllerContext.RouteData.Values["controller"].ToString(), action, pageSize.Value, param);
 
@@ -155,10 +154,12 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Create
+
+        [AuthorizeFilter]
         public ActionResult _Create(Repository value, ICrud model, ISuperController s = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             if (ModelState.IsValid)
                 try
@@ -204,10 +205,11 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Edit
+        [AuthorizeFilter]
         public ActionResult _Edit(Repository value, ICrud model, ISuperController s = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             if (ModelState.IsValid)
                 try
@@ -254,10 +256,11 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Delete
+        [AuthorizeFilter]
         public ActionResult _Delete(Repository value, ICrud model, ISuperController s = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             if (ModelState.IsValid)
                 try
@@ -572,10 +575,11 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Create
+        [AuthorizeFilter]
         public virtual ActionResult Create()
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             GetCreate();
 
@@ -583,10 +587,11 @@ namespace App_Dominio.Controllers
         }
 
         [HttpPost]
+        [AuthorizeFilter]
         public virtual ActionResult Create(R value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             R ret = SetCreate(value, getModel());
 
@@ -651,19 +656,21 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Edit
+        [AuthorizeFilter]
         public virtual ActionResult _Edit(R value, string breadCrumbText = null, IDictionary<string, string> text = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             return View(GetEdit(value, breadCrumbText, text));
         }
 
         [HttpPost]
+        [AuthorizeFilter]
         public virtual ActionResult Edit(R value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             R ret = SetEdit(value, getModel());
 
@@ -741,10 +748,11 @@ namespace App_Dominio.Controllers
 
         #region Delete
         [HttpPost]
+        [AuthorizeFilter]
         public virtual ActionResult Delete(R value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             R ret = SetDelete(value, getModel());
 
@@ -875,11 +883,12 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Master
+        [AuthorizeFilter]
         [HttpPost]
         public override ActionResult Create(M value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
@@ -899,10 +908,11 @@ namespace App_Dominio.Controllers
             }
         }
 
+        [AuthorizeFilter]
         public override ActionResult _Edit(M value, string breadCrumbText = null, IDictionary<string, string> text = null)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             value = getModel().getObject(value);
             if (value == null)
@@ -926,11 +936,12 @@ namespace App_Dominio.Controllers
         }
 
 
+        [AuthorizeFilter]
         [HttpPost]
         public override ActionResult Edit(M value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
@@ -960,11 +971,12 @@ namespace App_Dominio.Controllers
             }
         }
 
+        [AuthorizeFilter]
         [HttpPost]
         public override ActionResult Delete(M value, FormCollection collection)
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
@@ -1072,10 +1084,11 @@ namespace App_Dominio.Controllers
             return model.Delete(value);
         }
 
+        [AuthorizeFilter]
         public ActionResult _NewItem(IMasterRepository<I> master, string createItemAction = "CreateItem")
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             master = GetMaster(master); // recupera da sessao o repository master
             master.CreateItem();
@@ -1083,10 +1096,11 @@ namespace App_Dominio.Controllers
             return View(createItemAction, master);
         }
 
+        [AuthorizeFilter]
         public virtual ActionResult UpdateItem(I value, IMasterRepository<I> master, string operacao, IRootController<I> s = null, string actions = "EditItem|DeleteItem")
         {
-            if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-                return RedirectToAction("Index", "Home");
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
 
             master = GetMaster(master); // recupera da sessao o repository master
             P model = getModel(master.GetItems().ToList()); // cria uma instância do model e já atribui a ele o ListItem que estava na sessao
