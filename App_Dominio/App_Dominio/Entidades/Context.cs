@@ -14,7 +14,7 @@ namespace App_Dominio.Entidades
     public abstract class Context
     {
 
-        private App_DominioContext db { get; set; }
+        public App_DominioContext db { get; set; }
         public SecurityContext seguranca_db { get; set; }
         public App_DominioContext Create(App_DominioContext value)
         {
@@ -41,19 +41,6 @@ namespace App_Dominio.Entidades
         }
 
         public Sessao sessaoCorrente { get; set; }
-
-        #region Virtual Methods
-        public virtual App_DominioContext CreateContext()
-        {
-            return new App_DominioContext();
-        }
-
-        public virtual App_DominioContext default_db
-        {
-            get { return db; }
-            set { db = value;  }
-        }
-        #endregion
     }
 
     public abstract class CrudContext<E, R> : Context, ICrudContext<R> where E : class where R : Repository
@@ -84,7 +71,7 @@ namespace App_Dominio.Entidades
         /// <returns>Retorna uma instância do objeto repository a partir da chave primária</returns>
         public R getObject(R key) 
         {
-            using (default_db = new App_DominioContext())
+            using (db = new App_DominioContext())
             {
                 key.empresaId = sessaoCorrente.empresaId;
 
@@ -106,9 +93,9 @@ namespace App_Dominio.Entidades
         {
             IQueryable<E> entities = null;
 
-            using (default_db = CreateContext())
+            using (db = new App_DominioContext())
             {
-                entities = this.default_db.Set<E>().Where(where).AsQueryable();
+                entities = this.db.Set<E>().Where(where).AsQueryable();
             }
 
             return entities;
@@ -118,7 +105,7 @@ namespace App_Dominio.Entidades
         {
             IQueryable<E> entities = null;
 
-            entities = this.default_db.Set<E>().Where(where).AsQueryable();
+            entities = this.db.Set<E>().Where(where).AsQueryable();
 
             return entities;
         }
@@ -127,7 +114,7 @@ namespace App_Dominio.Entidades
         #region Insert
         public R Insert(R value)
         {
-            using (default_db = CreateContext())
+            using (db = new App_DominioContext())
             {
                 try
                 {
@@ -144,8 +131,8 @@ namespace App_Dominio.Entidades
                         E entity = MapToEntity(value);
                         #endregion
 
-                        this.default_db.Set<E>().Add(entity);
-                        default_db.SaveChanges();
+                        this.db.Set<E>().Add(entity);
+                        db.SaveChanges();
                         value = MapToRepository(entity);
                     }
                     #endregion
@@ -198,7 +185,7 @@ namespace App_Dominio.Entidades
         #region Update
         public R Update(R value)
         {
-            using (default_db = CreateContext())
+            using (db = new App_DominioContext())
             {
                 try
                 {
@@ -215,8 +202,8 @@ namespace App_Dominio.Entidades
                         E entity = MapToEntity(value);
                         #endregion
 
-                        default_db.Entry(entity).State = EntityState.Modified;
-                        default_db.SaveChanges();
+                        db.Entry(entity).State = EntityState.Modified;
+                        db.SaveChanges();
                     }
                     #endregion
                 }
@@ -267,7 +254,7 @@ namespace App_Dominio.Entidades
         #region Delete
         public R Delete(R value)
         {
-            using (default_db = CreateContext())
+            using (db = new App_DominioContext())
             {
                 try
                 {
@@ -283,8 +270,8 @@ namespace App_Dominio.Entidades
                         E entity = this.Find(value);
                         if (entity == null)
                             throw new ArgumentException("Objeto não identificado para exclusão");
-                        this.default_db.Set<E>().Remove(entity);
-                        default_db.SaveChanges();
+                        this.db.Set<E>().Remove(entity);
+                        db.SaveChanges();
                     }
                     #endregion
                 }
@@ -327,14 +314,14 @@ namespace App_Dominio.Entidades
         #region Save
         public R Save(R value, Expression<Func<E, bool>> where)
         {
-            using (default_db = this.CreateContext())
+            using (db = new App_DominioContext())
             {
                 try
                 {
                     value.empresaId = sessaoCorrente.empresaId;
                     Crud op = Crud.INCLUIR;
 
-                    if (Search(where, default_db) != null)
+                    if (Search(where, db) != null)
                         op = Crud.ALTERAR;    
 
                     #region validar alteração
@@ -349,10 +336,10 @@ namespace App_Dominio.Entidades
                         #endregion
 
                         if (op == Crud.ALTERAR)
-                            default_db.Entry(entity).State = EntityState.Modified;
+                            db.Entry(entity).State = EntityState.Modified;
                         else
-                            this.default_db.Set<E>().Add(entity);
-                        default_db.SaveChanges();
+                            this.db.Set<E>().Add(entity);
+                        db.SaveChanges();
                         value = MapToRepository(entity);
                     }
                     #endregion
@@ -406,19 +393,19 @@ namespace App_Dominio.Entidades
         {
             Validate mensagem = new Validate();
 
-            using (default_db = this.CreateContext())
+            using (db = new App_DominioContext())
             {
                 try
                 {
                     // exclui todo mundo para incluir novamente
-                    IEnumerable<E> entities = default_db.Set<E>().Where(where);
+                    IEnumerable<E> entities = db.Set<E>().Where(where);
 
-                    foreach (E entity in default_db.Set<E>().Where(where))
+                    foreach (E entity in db.Set<E>().Where(where))
                     {
-                        this.default_db.Set<E>().Remove(entity);
+                        this.db.Set<E>().Remove(entity);
                     }
 
-                    default_db.SaveChanges();
+                    db.SaveChanges();
 
                     // Inclui novamente
                     foreach (R value in values)
@@ -441,14 +428,14 @@ namespace App_Dominio.Entidades
                             #endregion
 
                             if (op == Crud.ALTERAR)
-                                default_db.Entry(entity).State = EntityState.Modified;
+                                db.Entry(entity).State = EntityState.Modified;
                             else
-                                this.default_db.Set<E>().Add(entity);
+                                this.db.Set<E>().Add(entity);
                         }
                         #endregion
                     }
 
-                    default_db.SaveChanges();
+                    db.SaveChanges();
 
                     mensagem = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
                     

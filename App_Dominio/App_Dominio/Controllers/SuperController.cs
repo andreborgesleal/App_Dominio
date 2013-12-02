@@ -111,6 +111,22 @@ namespace App_Dominio.Controllers
         }
 
         [AuthorizeFilter]
+        public ActionResult _List(int? index, int? pageSize, string action, IListRepository model, params object[] param)
+        {
+            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
+            //    return RedirectToAction("Index", "Home");
+
+            IPagedList pagedList = model.getPagedList(index, pageSize.Value, param);
+
+            if (pagedList.TotalCount == 0)
+                Attention("Não há registros a serem exibidos");
+
+            UpdateBreadCrumb(this.ControllerContext.RouteData.Values["controller"].ToString(), action);
+
+            return View(pagedList);
+        }
+
+        [AuthorizeFilter]
         public ActionResult _List(int? index, int? pageSize, string report, string action, IListRepository model, params object[] param)
         {
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
@@ -143,8 +159,6 @@ namespace App_Dominio.Controllers
 
             return View(pagedList);
         }
-
-
 
         public IPagedList PagedList(int? index, int? pageSize, string report, string action, IListRepository model, params object[] param)
         {
