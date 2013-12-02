@@ -105,15 +105,9 @@
     <Compile Include="Repositories\FiltroRepository.cs" />
     <Compile Include="Repositories\TransacaoRepository.cs" />
     <Compile Include="Repositories\TypeaheadRepository.cs" />
-    <Compile Include="Security\AccessRole.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="Security\App_DominioException.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
     <Compile Include="Security\LogAuditoria.cs" />
-    <Compile Include="Security\PermissionFilter.cs">
-      <SubType>Code</SubType>
-    </Compile>
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
