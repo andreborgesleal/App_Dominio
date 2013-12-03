@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace App_Dominio.Negocio
 {
-    public class FiltroModel : CrudContext<Filtro, FiltroRepository>
+    public class FiltroModel : CrudContext<Filtro, FiltroRepository, App_DominioContext>
     {
         #region Métodos da classe CrudContext
         public override Filtro MapToEntity(FiltroRepository value)
@@ -86,7 +86,7 @@ namespace App_Dominio.Negocio
         #endregion
     }
 
-    public class ListViewFiltro : ListViewRepository<FiltroRepository>
+    public class ListViewFiltro : ListViewRepository<FiltroRepository, App_DominioContext>
     {
         #region Métodos da classe ListViewRepository
         public override IEnumerable<FiltroRepository> Bind(int? index, int pageSize = 50, params object[] param)
@@ -126,7 +126,7 @@ namespace App_Dominio.Negocio
         #endregion
     }
 
-    public class ListViewFiltroByDescricao : ListViewRepository<FiltroRepository>
+    public class ListViewFiltroByDescricao : ListViewRepository<FiltroRepository, App_DominioContext>
     {
         #region Métodos da classe ListViewRepository
         public override IEnumerable<FiltroRepository> Bind(int? index, int pageSize = 50, params object[] param)

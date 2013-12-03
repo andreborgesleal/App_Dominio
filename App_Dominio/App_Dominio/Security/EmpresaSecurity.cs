@@ -14,7 +14,7 @@ using System.Web;
 
 namespace App_Dominio.Security
 {
-    public class EmpresaSecurity : Context, ISecurity
+    public class EmpresaSecurity<D> : Context<D>, ISecurity where D : App_DominioContext
     {
         private int Timeout = 20;
         public string Criptografar(string value)

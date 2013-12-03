@@ -1,4 +1,5 @@
-﻿using System;
+﻿using App_Dominio.Entidades;
+using System;
 using System.Collections.Generic;
 using System.Data.Entity.Validation;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace App_Dominio.Security
             try
             {
                 Roles = filterContext.Controller.ControllerContext.RouteData.Values["controller"].ToString() + "/" + filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString();
-                if (new EmpresaSecurity().AccessDenied(Roles))
+                if (new EmpresaSecurity<App_DominioContext>().AccessDenied(Roles))
                     filterContext.HttpContext.Response.Redirect("/Account/Login/");
             }
             catch (DbEntityValidationException ex)

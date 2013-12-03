@@ -11,7 +11,9 @@ using System.Web.Mvc;
 
 namespace App_Dominio.Component
 {
-    public abstract class ListViewRepository<R> : Context, IListRepository where R : Repository
+    public abstract class ListViewRepository<R, D> : Context<D>, IListRepository
+        where R : Repository
+        where D : App_DominioContext
     {
         private IEnumerable<FiltroRepository> Filtros;
 
@@ -51,7 +53,7 @@ namespace App_Dominio.Component
 
         public virtual IEnumerable<Repository> ListRepository(int? index, int pageSize = 50, params object[] param)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 return Bind(index, pageSize, param);
             }
@@ -80,7 +82,7 @@ namespace App_Dominio.Component
         #endregion
     }
 
-    public abstract class ReportRepository<R> : ListViewRepository<R>, IListReportRepository<R> where R : Repository
+    public abstract class ReportRepository<R, D> : ListViewRepository<R, D>, IListReportRepository<R> where R : Repository where D : App_DominioContext
     {
         public string totalizaColuna1 { get; set; }
         public string totalizaColuna2 { get; set; }
@@ -89,7 +91,7 @@ namespace App_Dominio.Component
 
         public override IEnumerable<Repository> ListRepository(int? index, int pageSize = 50, params object[] param)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 IEnumerable<R> r = Bind(index, pageSize, param);
                 if (r.Count() > 0)
@@ -101,7 +103,7 @@ namespace App_Dominio.Component
 
         public IEnumerable<R> ListReportRepository(params object[] param)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 IEnumerable<R> r = BindReport(param);
                 return r;

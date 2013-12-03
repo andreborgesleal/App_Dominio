@@ -11,12 +11,17 @@ using System.Linq.Expressions;
 
 namespace App_Dominio.Entidades
 {
-    public abstract class Context
+    public abstract class Context<D> where D : App_DominioContext
     {
+        protected D getContextInstance()
+        {
+            Type typeInstance = typeof(D);
+            return (D)Activator.CreateInstance(typeInstance);
+        }
 
-        public App_DominioContext db { get; set; }
+        public D db { get; set; }
         public SecurityContext seguranca_db { get; set; }
-        public App_DominioContext Create(App_DominioContext value)
+        public D Create(D value)
         {
             this.db = value;
 
@@ -30,20 +35,18 @@ namespace App_Dominio.Entidades
             return seguranca_db;
         }
 
-        public App_DominioContext Create()
+        public D Create()
         {
-            db = new App_DominioContext();
+            db = getContextInstance();
             seguranca_db = new SecurityContext();
-
             sessaoCorrente = seguranca_db.Sessaos.Find(System.Web.HttpContext.Current.Session.SessionID);
-
             return db;
         }
 
         public Sessao sessaoCorrente { get; set; }
     }
 
-    public abstract class CrudContext<E, R> : Context, ICrudContext<R> where E : class where R : Repository
+    public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R> where E : class where R : Repository where D : App_DominioContext
     {
         #region Métodos virtuais 
         public abstract E MapToEntity(R value);
@@ -71,8 +74,8 @@ namespace App_Dominio.Entidades
         /// <returns>Retorna uma instância do objeto repository a partir da chave primária</returns>
         public R getObject(R key) 
         {
-            using (db = new App_DominioContext())
-            {
+            using (db = getContextInstance())
+            { 
                 key.empresaId = sessaoCorrente.empresaId;
 
                 E entity = Find(key);
@@ -93,7 +96,7 @@ namespace App_Dominio.Entidades
         {
             IQueryable<E> entities = null;
 
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 entities = this.db.Set<E>().Where(where).AsQueryable();
             }
@@ -114,7 +117,7 @@ namespace App_Dominio.Entidades
         #region Insert
         public R Insert(R value)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 try
                 {
@@ -185,7 +188,7 @@ namespace App_Dominio.Entidades
         #region Update
         public R Update(R value)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 try
                 {
@@ -254,7 +257,7 @@ namespace App_Dominio.Entidades
         #region Delete
         public R Delete(R value)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 try
                 {
@@ -314,7 +317,7 @@ namespace App_Dominio.Entidades
         #region Save
         public R Save(R value, Expression<Func<E, bool>> where)
         {
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 try
                 {
@@ -393,7 +396,7 @@ namespace App_Dominio.Entidades
         {
             Validate mensagem = new Validate();
 
-            using (db = new App_DominioContext())
+            using (db = getContextInstance())
             {
                 try
                 {
@@ -491,8 +494,10 @@ namespace App_Dominio.Entidades
         }
     }
 
-    public abstract class CrudItem<R> : Context, ICrudItemContext<R>
+    public abstract class CrudItem<R,D> : Context<D>, ICrudItemContext<R> 
         where R : Repository
+        where D : App_DominioContext
+
     {
         private IList<R> ListItem { get; set; }
 
@@ -510,7 +515,6 @@ namespace App_Dominio.Entidades
         {
             ListItem = list;
         }
-
 
         #region Métodos virtuais
         public abstract R Find(R key);

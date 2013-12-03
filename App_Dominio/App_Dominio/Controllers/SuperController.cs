@@ -33,10 +33,12 @@ namespace App_Dominio.Controllers
         protected int PageSize = 50;
         protected Validate result { get; set; }
 
+        public abstract int _sistema_id();
+
         #region Segurança
         protected bool AccessDenied(string url = null)
         {
-            EmpresaSecurity security = new EmpresaSecurity();
+            EmpresaSecurity<App_DominioContext> security = new EmpresaSecurity<App_DominioContext>();
             if (url != null)
                 return security.AccessDenied(url);
             else
@@ -417,7 +419,7 @@ namespace App_Dominio.Controllers
         {
             try
             {
-                EmpresaSecurity empresa = new EmpresaSecurity();
+                EmpresaSecurity<App_DominioContext> empresa = new EmpresaSecurity<App_DominioContext>();
                 FiltroModel model = new FiltroModel();
                 FiltroRepository f = values.First();
                 int empresaId = empresa.getSessaoCorrente().empresaId;
@@ -470,10 +472,10 @@ namespace App_Dominio.Controllers
     public abstract class ReportController<R> : SuperController where R : Repository
     {
         #region Exportar para PDF (Report Server)
-        public FileResult _PDF(string export, string fileName, ReportRepository<R> report, ReportParameter[] p,
+        public FileResult _PDF(string export, string fileName, ReportRepository<R, App_DominioContext> report, ReportParameter[] p,
                                 string PageWidth = "21cm", string PageHeight = "29,7cm", params object[] param)
         {
-            p[0] = new ReportParameter("empresa", new EmpresaSecurity().getEmpresa().nome, false);
+            p[0] = new ReportParameter("empresa", new EmpresaSecurity<App_DominioContext>().getEmpresa().nome, false);
 
             LocalReport relatorio = new LocalReport();
             relatorio.ReportPath = Server.MapPath("~/App_Data/rdlc/" + fileName + ".rdlc");
