@@ -121,7 +121,7 @@ namespace App_Dominio.Entidades
             {
                 try
                 {
-                    value.empresaId = sessaoCorrente.empresaId;
+                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
 
                     #region validar inclusão
                     value.mensagem = this.Validate(value, Crud.INCLUIR);
