@@ -75,8 +75,8 @@ namespace App_Dominio.Entidades
         public R getObject(R key) 
         {
             using (db = getContextInstance())
-            { 
-                key.empresaId = sessaoCorrente.empresaId;
+            {
+                key.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
 
                 E entity = Find(key);
 
@@ -192,7 +192,7 @@ namespace App_Dominio.Entidades
             {
                 try
                 {
-                    value.empresaId = sessaoCorrente.empresaId;
+                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
 
                     #region validar alteração
                     value.mensagem = this.Validate(value, Crud.ALTERAR);
@@ -261,7 +261,7 @@ namespace App_Dominio.Entidades
             {
                 try
                 {
-                    value.empresaId = sessaoCorrente.empresaId;
+                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
 
                     #region validar exclusão
                     value.mensagem = this.Validate(value, Crud.EXCLUIR);
@@ -321,7 +321,7 @@ namespace App_Dominio.Entidades
             {
                 try
                 {
-                    value.empresaId = sessaoCorrente.empresaId;
+                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
                     Crud op = Crud.INCLUIR;
 
                     if (Search(where, db) != null)
@@ -413,7 +413,7 @@ namespace App_Dominio.Entidades
                     // Inclui novamente
                     foreach (R value in values)
                     {
-                        value.empresaId = sessaoCorrente.empresaId;
+                        value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
                         Crud op = Crud.INCLUIR;
 
                         if (Find(value) != null)
