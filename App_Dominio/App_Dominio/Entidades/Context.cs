@@ -11,7 +11,7 @@ using System.Linq.Expressions;
 
 namespace App_Dominio.Entidades
 {
-    public abstract class Context<D> where D : App_DominioContext
+    public abstract class Context<D> where D : DbContext
     {
         protected D getContextInstance()
         {
@@ -46,7 +46,7 @@ namespace App_Dominio.Entidades
         public Sessao sessaoCorrente { get; set; }
     }
 
-    public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R> where E : class where R : Repository where D : App_DominioContext
+    public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R> where E : class where R : Repository where D : DbContext
     {
         #region Métodos virtuais 
         public abstract E MapToEntity(R value);
@@ -496,7 +496,7 @@ namespace App_Dominio.Entidades
 
     public abstract class CrudItem<R,D> : Context<D>, ICrudItemContext<R> 
         where R : Repository
-        where D : App_DominioContext
+        where D : DbContext
 
     {
         private IList<R> ListItem { get; set; }

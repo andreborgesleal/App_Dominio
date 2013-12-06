@@ -18,6 +18,5 @@ namespace App_Dominio.Entidades
 		{
 		}
         public DbSet<Filtro> Filtros { get; set; }
-
     }
 }

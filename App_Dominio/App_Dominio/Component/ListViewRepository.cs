@@ -5,6 +5,7 @@ using App_Dominio.Repositories;
 using App_Dominio.Security;
 using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -13,7 +14,7 @@ namespace App_Dominio.Component
 {
     public abstract class ListViewRepository<R, D> : Context<D>, IListRepository
         where R : Repository
-        where D : App_DominioContext
+        where D : DbContext
     {
         private IEnumerable<FiltroRepository> Filtros;
 
