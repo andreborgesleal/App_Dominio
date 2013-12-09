@@ -100,6 +100,7 @@
     <Compile Include="Enumeracoes\Constantes.cs" />
     <Compile Include="Enumeracoes\MensagemPadrao.cs" />
     <Compile Include="Negocio\FiltroModel.cs" />
+    <Compile Include="Negocio\UsuarioModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repositories\ButtonRepository.cs" />
     <Compile Include="Repositories\FiltroRepository.cs" />
@@ -107,6 +108,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Repositories\TypeaheadRepository.cs" />
+    <Compile Include="Repositories\UsuarioRepository.cs" />
     <Compile Include="Security\App_DominioException.cs" />
     <Compile Include="Security\AuthorizeFilter.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
