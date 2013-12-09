@@ -108,7 +108,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Repositories\TypeaheadRepository.cs" />
-    <Compile Include="Repositories\UsuarioRepository.cs" />
+    <Compile Include="Repositories\UsuarioRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Security\App_DominioException.cs" />
     <Compile Include="Security\AuthorizeFilter.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
