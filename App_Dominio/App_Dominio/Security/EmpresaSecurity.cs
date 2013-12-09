@@ -5,6 +5,7 @@ using App_Dominio.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Entity;
 using System.Data.Entity.Validation;
 using System.Globalization;
 using System.Linq;
@@ -14,7 +15,7 @@ using System.Web;
 
 namespace App_Dominio.Security
 {
-    public class EmpresaSecurity<D> : Context<D>, ISecurity where D : App_DominioContext
+    public class EmpresaSecurity<D> : Context<D>, ISecurity where D : DbContext
     {
         private int Timeout = 20;
         public string Criptografar(string value)
@@ -504,6 +505,35 @@ namespace App_Dominio.Security
                 }
                 else
                     return true;
+            }
+
+        }
+
+        #endregion
+
+        #region Retorna os usuários de uma empresa e sistema 
+        public IEnumerable<UsuarioRepository> getUsuarios(int sistemaId, int empresaId)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                IEnumerable<UsuarioRepository> q = from usu in seguranca_db.Usuarios
+                                                   join ugr in seguranca_db.UsuarioGrupos on usu equals ugr.Usuario
+                                                   join gru in seguranca_db.Grupos on ugr.Grupo equals gru
+                                                   where usu.empresaId == empresaId
+                                                            && gru.sistemaId == sistemaId
+                                                            && usu.situacao == "A"
+                                                            && ugr.situacao == "A"
+                                                            && gru.situacao == "A"
+                                                   select new UsuarioRepository()
+                                                   {
+                                                       usuarioId = usu.usuarioId,
+                                                       nome = usu.nome,
+                                                       login = usu.login,
+                                                       situacao = usu.situacao,
+                                                       dt_cadastro = usu.dt_cadastro,
+                                                       isAdmin = usu.isAdmin
+                                                   };
+                return q.ToList();
             }
 
         }

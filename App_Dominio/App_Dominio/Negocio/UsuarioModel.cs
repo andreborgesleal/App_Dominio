@@ -92,10 +92,11 @@ namespace App_Dominio.Negocio
             EmpresaSecurity<App_DominioContext> security = new EmpresaSecurity<App_DominioContext>();
             string _descricao = param != null && param.Count() > 0 && param[0] != null ? param[0].ToString() : null;
             int _sistemaId = param != null && param.Count() > 1 && param[1] != null ? (int)param[1] : 0;
+            int _empresaId = security.getSessaoCorrente().empresaId;
             return (from usu in db.Usuarios join ugr in db.UsuarioGrupos on usu equals ugr.Usuario
                     join gru in db.Grupos on ugr.Grupo equals gru
                     where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu.nome.StartsWith(_descricao.Trim())) 
-                            && usu.empresaId == security.getSessaoCorrente().empresaId
+                            && usu.empresaId == _empresaId
                             && gru.sistemaId == _sistemaId
                             && gru.situacao == "A"
                             && ugr.situacao == "A"
@@ -118,7 +119,7 @@ namespace App_Dominio.Negocio
                                       join ugr1 in db.UsuarioGrupos on usu1 equals ugr1.Usuario
                                       join gru1 in db.Grupos on ugr1.Grupo equals gru1
                                       where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu1.nome.StartsWith(_descricao.Trim()))
-                                              && usu1.empresaId == security.getSessaoCorrente().empresaId
+                                              && usu1.empresaId == _empresaId
                                               && gru1.sistemaId == _sistemaId
                                               && gru1.situacao == "A"
                                               && ugr1.situacao == "A"
