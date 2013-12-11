@@ -31,6 +31,7 @@ namespace App_Dominio.Security
                 hashValue.AppendFormat(CultureInfo.InvariantCulture, "{0:X2}", b);
             }
 
+            
             return hashValue.ToString();
         }
         
