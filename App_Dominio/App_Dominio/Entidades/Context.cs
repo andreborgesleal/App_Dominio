@@ -162,7 +162,7 @@ namespace App_Dominio.Entidades
                     else
                     {
                         value.mensagem.Code = 44;
-                        value.mensagem.Message = MensagemPadrao.Message(42).ToString();
+                        value.mensagem.Message = MensagemPadrao.Message(44).ToString();
                         value.mensagem.MessageType = MsgType.ERROR;
                     }
 
