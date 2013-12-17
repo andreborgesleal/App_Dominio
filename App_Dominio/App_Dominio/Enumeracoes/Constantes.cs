@@ -165,6 +165,20 @@ namespace App_Dominio.Enumeracoes
         }
 
         /// <summary>
+        /// Sexo
+        /// </summary>
+        public enum Sexo
+        {
+            [StringDescription("Masculino")]
+            [StringValue("M")]
+            MASCULINO,
+            [StringDescription("Feminino")]
+            [StringValue("F")]
+            FEMININO
+        }
+
+
+        /// <summary>
         /// Tipo de Telefone
         /// </summary>
         public enum TipoTelefone

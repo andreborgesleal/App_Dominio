@@ -175,5 +175,23 @@ namespace App_Dominio.Enumeracoes
         }
         #endregion
 
+        #region DropDownList Sexo
+        /// <summary>
+        /// Retorna os valores constantes M ou F para uma seleção 
+        /// </summary>
+        /// <param name="selectedValue">Item da lista que receberá o foco inicial</param>
+        /// <param name="header">Informar o cabeçalho do dropdownlist. Exemplo: "Selecione...". Observação: Se não informado o dropdownlist não terá cabeçalho.</param>
+        /// <returns></returns>
+        public static IEnumerable<SelectListItem> Sexo(string selectedValue = "", string header = "")
+        {
+            List<SelectListItem> drp = new List<SelectListItem>() { 
+                new SelectListItem() { Value = Enumeradores.Sexo.MASCULINO.GetStringValue(), Text = Enumeradores.Sexo.MASCULINO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.Sexo.FEMININO.GetStringValue(), Text = Enumeradores.Sexo.FEMININO.GetStringDescription() }
+            };
+
+            return Funcoes.SelectListEnum(drp, selectedValue, header);
+        }
+        #endregion
+
     }
 }
