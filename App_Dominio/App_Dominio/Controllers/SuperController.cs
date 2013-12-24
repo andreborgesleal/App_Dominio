@@ -609,7 +609,7 @@ namespace App_Dominio.Controllers
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
-            R ret = SetCreate(value, getModel());
+            R ret = SetCreate(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
                 return RedirectToAction("Create");
@@ -622,13 +622,13 @@ namespace App_Dominio.Controllers
             BindBreadCrumb(breadCrumbText);
         }
 
-        public virtual R SetCreate(R value, ICrudContext<R> model, string breadCrumbText = "Inclusão", IRootController<R> s = null)
+        public virtual R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
                 {
                     if (s != null)
-                        s.beforeCreate(ref value, model);
+                        s.beforeCreate(ref value, model, collection);
 
                     value = model.Insert(value);
                     if (value.mensagem.Code > 0)
@@ -638,7 +638,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (App_DominioException ex)
                 {
-
+                    OnCreateError(ref value, model, collection);
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
                         Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -647,6 +647,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
+                    OnCreateError(ref value, model, collection);
                     App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -669,6 +670,8 @@ namespace App_Dominio.Controllers
 
             return value;
         }
+
+        public virtual void OnCreateError(ref R value, ICrudContext<R> model, FormCollection collection) {}
         #endregion
 
         #region Edit
@@ -688,7 +691,7 @@ namespace App_Dominio.Controllers
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
-            R ret = SetEdit(value, getModel());
+            R ret = SetEdit(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
             {
@@ -713,7 +716,7 @@ namespace App_Dominio.Controllers
             return getModel().getObject(key);
         }
 
-        public virtual R SetEdit(R value, ICrudContext<R> model, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        public virtual R SetEdit(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
@@ -729,6 +732,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (App_DominioException ex)
                 {
+                    OnEditError(ref value, model, collection);
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
                         Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -737,6 +741,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
+                    OnEditError(ref value, model, collection);
                     App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -760,6 +765,7 @@ namespace App_Dominio.Controllers
             return value;
 
         }
+        public virtual void OnEditError(ref R value, ICrudContext<R> model, FormCollection collection) { }
         #endregion
 
         #region Delete
@@ -770,7 +776,7 @@ namespace App_Dominio.Controllers
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
-            R ret = SetDelete(value, getModel());
+            R ret = SetDelete(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
             {
@@ -788,7 +794,7 @@ namespace App_Dominio.Controllers
                 return View(ret);
         }
 
-        public virtual R SetDelete(R value, ICrudContext<R> model, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        public virtual R SetDelete(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
@@ -804,6 +810,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (App_DominioException ex)
                 {
+                    OnDeleteError(ref value, model, collection);
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
                         Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -812,6 +819,7 @@ namespace App_Dominio.Controllers
                 }
                 catch (Exception ex)
                 {
+                    OnDeleteError(ref value, model, collection);
                     App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
@@ -834,6 +842,7 @@ namespace App_Dominio.Controllers
 
             return value;
         }
+        public virtual void OnDeleteError(ref R value, ICrudContext<R> model, FormCollection collection) { }
         #endregion
         #endregion
 
@@ -909,7 +918,7 @@ namespace App_Dominio.Controllers
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
 
-            M ret = SetCreate(value, getModel());
+            M ret = SetCreate(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
                 return RedirectToAction("Create");
@@ -962,7 +971,7 @@ namespace App_Dominio.Controllers
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
 
-            M ret = SetEdit(value, getModel());
+            M ret = SetEdit(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
             {
@@ -997,7 +1006,7 @@ namespace App_Dominio.Controllers
             IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
             ((IMasterRepository<I>)value).SetItems(x.GetItems());
 
-            M ret = SetDelete(value, getModel());
+            M ret = SetDelete(value, getModel(), collection);
 
             if (ret.mensagem.Code == 0)
             {

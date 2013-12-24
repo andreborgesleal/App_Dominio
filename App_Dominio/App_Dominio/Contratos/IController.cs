@@ -29,4 +29,11 @@ namespace App_Dominio.Contratos
         IList<SelectListItem> getItems();
     }
 
+    public interface IBaseController<R> where R : Repository
+    {
+        void beforeCreate(ref R value, ICrudContext<R> model, FormCollection collection);
+        void beforeEdit(ref R value, ICrudContext<R> model, FormCollection collection);
+        void beforeDelete(ref R value, ICrudContext<R> model, FormCollection collection);
+    }
+
 }
