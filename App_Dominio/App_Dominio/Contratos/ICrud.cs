@@ -31,7 +31,10 @@ namespace App_Dominio.Contratos
         R SetKey(R r);
     }
 
-
+    public interface IProcessContext<R> : ICrudContext<R> where R : Repository
+    {
+        R SaveAll(R value);
+    }
 
 }
 

@@ -895,6 +895,168 @@ namespace App_Dominio.Controllers
         #endregion
     }
 
+    public abstract class ProcessController<R,T> : RootController<R,T>
+        where R : Repository
+        where T : IProcessContext<R>
+    {
+        #region CRUD
+        #region Create
+        public virtual R SetCreate(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
+        {
+            if (ModelState.IsValid)
+                try
+                {
+                    if (s != null)
+                        s.beforeCreate(ref value, model, collection);
+
+                    value = model.SaveAll(value);
+                    if (value.mensagem.Code > 0)
+                        throw new App_DominioException(value.mensagem);
+
+                    Success("Registro incluído com sucesso");
+                }
+                catch (App_DominioException ex)
+                {
+                    OnCreateError(ref value, model, collection);
+                    ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
+                    if (ex.Result.MessageType == MsgType.ERROR)
+                        Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                    else
+                        Attention(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                catch (Exception ex)
+                {
+                    OnCreateError(ref value, model, collection);
+                    App_DominioException.saveError(ex, GetType().FullName);
+                    ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
+                    Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                finally
+                {
+                    BindBreadCrumb(breadCrumbText);
+                }
+            else
+            {
+                value.mensagem = new Validate()
+                {
+                    Code = 999,
+                    Message = MensagemPadrao.Message(999).ToString(),
+                    MessageBase = ModelState.Values.Where(erro => erro.Errors.Count > 0).First().Errors[0].ErrorMessage
+                };
+                ModelState.AddModelError("", value.mensagem.Message); // mensagem amigável ao usuário
+                Attention(value.mensagem.MessageBase);
+            }
+
+            return value;
+        }
+        #endregion
+
+        #region Edit
+        public virtual R SetEdit(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        {
+            if (ModelState.IsValid)
+                try
+                {
+                    if (s != null)
+                        s.beforeEdit(ref value, model);
+
+                    value = model.SaveAll(value);
+                    if (value.mensagem.Code > 0)
+                        throw new App_DominioException(value.mensagem);
+
+                    Success("Registro alterado com sucesso");
+                }
+                catch (App_DominioException ex)
+                {
+                    OnEditError(ref value, model, collection);
+                    ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
+                    if (ex.Result.MessageType == MsgType.ERROR)
+                        Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                    else
+                        Attention(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                catch (Exception ex)
+                {
+                    OnEditError(ref value, model, collection);
+                    App_DominioException.saveError(ex, GetType().FullName);
+                    ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
+                    Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                finally
+                {
+                    BindBreadCrumb(getBreadCrumbText(breadCrumbText, text));
+                }
+            else
+            {
+                value.mensagem = new Validate()
+                {
+                    Code = 999,
+                    Message = MensagemPadrao.Message(999).ToString(),
+                    MessageBase = ModelState.Values.Where(erro => erro.Errors.Count > 0).First().Errors[0].ErrorMessage
+                };
+                ModelState.AddModelError("", value.mensagem.Message); // mensagem amigável ao usuário
+                Attention(value.mensagem.MessageBase);
+            }
+
+            return value;
+
+        }
+        #endregion
+
+        #region Delete
+        public virtual R SetDelete(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        {
+            if (ModelState.IsValid)
+                try
+                {
+                    if (s != null)
+                        s.beforeDelete(ref value, model);
+
+                    value = model.SaveAll(value);
+                    if (value.mensagem.Code > 0)
+                        throw new App_DominioException(value.mensagem);
+
+                    Success("Registro excluído com sucesso");
+                }
+                catch (App_DominioException ex)
+                {
+                    OnDeleteError(ref value, model, collection);
+                    ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
+                    if (ex.Result.MessageType == MsgType.ERROR)
+                        Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                    else
+                        Attention(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                catch (Exception ex)
+                {
+                    OnDeleteError(ref value, model, collection);
+                    App_DominioException.saveError(ex, GetType().FullName);
+                    ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
+                    Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                }
+                finally
+                {
+                    BindBreadCrumb(getBreadCrumbText(breadCrumbText, text));
+                }
+            else
+            {
+                value.mensagem = new Validate()
+                {
+                    Code = 999,
+                    Message = MensagemPadrao.Message(999).ToString(),
+                    MessageBase = ModelState.Values.Where(erro => erro.Errors.Count > 0).First().Errors[0].ErrorMessage
+                };
+                ModelState.AddModelError("", value.mensagem.Message); // mensagem amigável ao usuário
+                Attention(value.mensagem.MessageBase);
+            }
+
+            return value;
+        }
+        #endregion
+        #endregion
+    }
+
+
     public abstract class RootItemController<M, T, I, P> : RootController<M, T>
         where M : Repository
         where T : ICrudContext<M>

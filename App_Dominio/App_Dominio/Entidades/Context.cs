@@ -651,7 +651,7 @@ namespace App_Dominio.Entidades
         }
     }
 
-    public abstract class ProcessContext<E, R, D> : CrudContext<E, R, D>
+    public abstract class ProcessContext<E, R, D> : CrudContext<E, R, D>, IProcessContext<R>
         where E : class
         where R : Repository
         where D : DbContext
