@@ -1,6 +1,7 @@
 ﻿using App_Dominio.Contratos;
 using App_Dominio.Entidades;
 using App_Dominio.Enumeracoes;
+using App_Dominio.Negocio;
 using App_Dominio.Repositories;
 using System;
 using System.Collections.Generic;
@@ -539,6 +540,26 @@ namespace App_Dominio.Security
 
         }
 
+        #endregion
+
+        #region Alerta
+        public AlertaRepository InsertAlerta(AlertaRepository value)
+        {
+            try
+            {
+                value = new AlertaModel().Insert(value);
+            }
+            catch (Exception ex)
+            {
+                value.mensagem.Code = 17;
+                value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                value.mensagem.MessageType = MsgType.ERROR;
+            }
+
+            return value;
+
+        }
         #endregion
 
     }

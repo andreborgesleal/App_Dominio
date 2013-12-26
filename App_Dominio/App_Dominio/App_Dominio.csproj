@@ -99,9 +99,15 @@
     <Compile Include="Enumeracoes\BindDropDownList.cs" />
     <Compile Include="Enumeracoes\Constantes.cs" />
     <Compile Include="Enumeracoes\MensagemPadrao.cs" />
+    <Compile Include="Negocio\AlertaModel.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Negocio\FiltroModel.cs" />
     <Compile Include="Negocio\UsuarioModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\AlertaRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Repositories\ButtonRepository.cs" />
     <Compile Include="Repositories\FiltroRepository.cs" />
     <Compile Include="Repositories\TransacaoRepository.cs">

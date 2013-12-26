@@ -651,5 +651,89 @@ namespace App_Dominio.Entidades
         }
     }
 
+    public abstract class ProcessContext<E, R, D> : CrudContext<E, R, D>
+        where E : class
+        where R : Repository
+        where D : DbContext
+    {
+        public abstract R ExecProcess(R value);
+
+        #region Save All
+        public R SaveAll(R value)
+        {
+            using (db = getContextInstance())
+            {
+                try
+                {
+                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
+
+                    #region validar inclusão
+                    value.mensagem = this.Validate(value, Crud.INCLUIR);
+                    #endregion
+
+                    #region insere os registros
+                    if (value.mensagem.Code == 0)
+                    {
+                        value = ExecProcess(value);
+                        db.SaveChanges();
+
+                        // só deverá ser implementado se não for executar operações na conexão atual.
+                        // caso contrário deverá ser feito dentro do método ExecProcess
+                        value.mensagem = AfterInsert(value);
+                        if (value.mensagem.Code > 0)
+                            throw new DbUpdateException(value.mensagem.MessageBase);
+                    }
+                    #endregion
+                }
+                catch (ArgumentException ex)
+                {
+                    value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                }
+                catch (DbUpdateException ex)
+                {
+                    value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                    if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                    {
+                        value.mensagem.Code = 45;
+                        value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                        value.mensagem.MessageType = MsgType.ERROR;
+                    }
+                    else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                    {
+                        value.mensagem.Code = 37;
+                        value.mensagem.Message = MensagemPadrao.Message(37).ToString();
+                        value.mensagem.MessageType = MsgType.WARNING;
+                    }
+                    else
+                    {
+                        value.mensagem.Code = 44;
+                        value.mensagem.Message = MensagemPadrao.Message(44).ToString();
+                        value.mensagem.MessageType = MsgType.ERROR;
+                    }
+
+                }
+                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                {
+                    value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                }
+                catch (Exception ex)
+                {
+                    value.mensagem.Code = 17;
+                    value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                    value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                    value.mensagem.MessageType = MsgType.ERROR;
+                }
+            }
+
+            return value;
+
+        }
+        #endregion
+
+        public virtual Validate AfterInsert(R value) 
+        { 
+            return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
+        }   
+    }
 
 }

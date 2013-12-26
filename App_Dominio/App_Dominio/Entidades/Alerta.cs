@@ -10,13 +10,13 @@ namespace App_Dominio.Entidades
     {
         [Key]
         [DisplayName("ID Alerta")]
-        public decimal alertaId { get; set; }
+        public int alertaId { get; set; }
 
         public int usuarioId { get; set; }
 
         public DateTime dt_emissao { get; set; }
 
-        public DateTime dt_leitura { get; set; }
+        public Nullable<DateTime> dt_leitura { get; set; }
 
         public string mensagem { get; set; }
 

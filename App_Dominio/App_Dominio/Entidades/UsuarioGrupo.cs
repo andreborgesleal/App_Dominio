@@ -10,7 +10,7 @@ namespace App_Dominio.Entidades
     {
         [Key, Column(Order = 0)]
         [DisplayName("ID Usuário")]
-        public decimal usuarioId { get; set; }
+        public int usuarioId { get; set; }
         [Key, Column(Order = 1)]
         [DisplayName("ID Grupo")]
         public int grupoId { get; set; }

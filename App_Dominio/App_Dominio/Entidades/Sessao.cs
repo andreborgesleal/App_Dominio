@@ -15,7 +15,7 @@ namespace App_Dominio.Entidades
 
         public int sistemaId { get; set; }
 
-        public decimal usuarioId { get; set; }
+        public int usuarioId { get; set; }
 
         public int empresaId { get; set; }
 

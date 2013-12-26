@@ -9,7 +9,7 @@ namespace App_Dominio.Repositories
     public class UsuarioRepository : Repository
     {
         [DisplayName("ID")]
-        public decimal usuarioId { get; set; }
+        public int usuarioId { get; set; }
 
         [DisplayName("Empresa ID")]
         public int empresaId { get; set; }
