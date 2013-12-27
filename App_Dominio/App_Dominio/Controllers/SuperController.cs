@@ -602,6 +602,7 @@ namespace App_Dominio.Controllers
             return View(getModel().CreateRepository());
         }
 
+        [ValidateInput(false)]
         [HttpPost]
         [AuthorizeFilter]
         public virtual ActionResult Create(R value, FormCollection collection)
@@ -684,6 +685,7 @@ namespace App_Dominio.Controllers
             return View(GetEdit(value, breadCrumbText, text));
         }
 
+        [ValidateInput(false)]
         [HttpPost]
         [AuthorizeFilter]
         public virtual ActionResult Edit(R value, FormCollection collection)
