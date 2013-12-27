@@ -901,7 +901,7 @@ namespace App_Dominio.Controllers
     {
         #region CRUD
         #region Create
-        public virtual R SetCreate(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
+        public override R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
@@ -909,7 +909,7 @@ namespace App_Dominio.Controllers
                     if (s != null)
                         s.beforeCreate(ref value, model, collection);
 
-                    value = model.SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
@@ -952,7 +952,7 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Edit
-        public virtual R SetEdit(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        public override R SetEdit(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
@@ -960,7 +960,7 @@ namespace App_Dominio.Controllers
                     if (s != null)
                         s.beforeEdit(ref value, model);
 
-                    value = model.SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
@@ -1004,7 +1004,7 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Delete
-        public virtual R SetDelete(R value, IProcessContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
+        public override R SetDelete(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
@@ -1012,7 +1012,7 @@ namespace App_Dominio.Controllers
                     if (s != null)
                         s.beforeDelete(ref value, model);
 
-                    value = model.SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
