@@ -18,6 +18,10 @@ namespace App_Dominio.Entidades
 
         public Nullable<DateTime> dt_leitura { get; set; }
 
+        public string linkText { get; set; }
+
+        public string url { get; set; }
+
         public string mensagem { get; set; }
 
         public virtual Usuario usuario { get; set; }

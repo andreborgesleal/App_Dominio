@@ -656,7 +656,7 @@ namespace App_Dominio.Entidades
         where R : Repository
         where D : DbContext
     {
-        public abstract R ExecProcess(R value);
+        public abstract E ExecProcess(R value);
 
         #region Save All
         public R SaveAll(R value)
@@ -674,8 +674,9 @@ namespace App_Dominio.Entidades
                     #region insere os registros
                     if (value.mensagem.Code == 0)
                     {
-                        value = ExecProcess(value);
+                        E entity = ExecProcess(value);
                         db.SaveChanges();
+                        value = MapToRepository(entity);
 
                         // só deverá ser implementado se não for executar operações na conexão atual.
                         // caso contrário deverá ser feito dentro do método ExecProcess

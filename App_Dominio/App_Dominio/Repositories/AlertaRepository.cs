@@ -22,6 +22,14 @@ namespace App_Dominio.Repositories
         [DisplayName("Dt Leitura")]
         public Nullable<DateTime> dt_leitura { get; set; }
 
+        [DisplayName("LinkText")]
+        [Required]
+        public string linkText { get; set; }
+
+        [DisplayName("URL")]
+        [Required]
+        public string url { get; set; }
+
         [DisplayName("Mensagem")]
         [Required]
         public string mensagemAlerta { get; set; }

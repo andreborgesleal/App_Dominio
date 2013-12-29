@@ -318,6 +318,41 @@ namespace App_Dominio.Security
         }
         #endregion
 
+        #region Retorna os últimos 6 Alertas do usuário da sessão corrente
+        public IEnumerable<AlertaRepository> getLast6Alertas()
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                System.Web.HttpContext web = System.Web.HttpContext.Current;
+                if (_ValidarSessao(web.Session.SessionID))
+                {
+                    sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    DateTime seisDias = DateTime.Today.AddDays(-6);
+
+                    IEnumerable<AlertaRepository> q = (from a in seguranca_db.Alertas
+                                                       where a.usuarioId == sessaoCorrente.usuarioId
+                                                               && a.dt_emissao >= seisDias
+                                                       orderby a.dt_emissao descending
+                                                       select new AlertaRepository()
+                                                       {
+                                                           alertaId = a.alertaId,
+                                                           dt_emissao = a.dt_emissao,
+                                                           dt_leitura = a.dt_leitura,
+                                                           usuarioId = a.usuarioId,
+                                                           linkText = a.linkText,
+                                                           url = a.url,
+                                                           mensagemAlerta = a.mensagem
+                                                       }
+                                            ).Take(6).ToList(); // ultimos 6 alertas
+                    return q;
+                }
+                else
+                    return null;
+            }
+        }
+        #endregion
+
         #region Retorna os grupos de um dado usuário
         public IEnumerable<Grupo> getUsuarioGrupo(decimal? usuarioId = null)
         {
@@ -560,6 +595,30 @@ namespace App_Dominio.Security
             return value;
 
         }
+
+        public void ReadAlert(int alertaId)
+        {
+            AlertaModel model = new AlertaModel();
+            AlertaRepository value = new AlertaRepository();
+
+            try
+            {
+                value.alertaId = alertaId;
+                value = model.getObject(value);
+                
+                value.dt_leitura = DateTime.Now;
+
+                value = model.Update(value);
+            }
+            catch (Exception ex)
+            {
+                value.mensagem.Code = 17;
+                value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                value.mensagem.MessageType = MsgType.ERROR;
+            }
+        }
+
         #endregion
 
     }

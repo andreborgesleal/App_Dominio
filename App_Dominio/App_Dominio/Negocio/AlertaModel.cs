@@ -22,6 +22,8 @@ namespace App_Dominio.Negocio
                 usuarioId = value.usuarioId,
                 dt_emissao = value.dt_emissao,
                 dt_leitura = value.dt_leitura,
+                linkText = value.linkText,
+                url = value.url,
                 mensagem = value.mensagemAlerta
             };
         }
@@ -34,6 +36,8 @@ namespace App_Dominio.Negocio
                 usuarioId = entity.usuarioId,
                 dt_emissao = entity.dt_emissao,
                 dt_leitura = entity.dt_leitura,
+                linkText = entity.linkText,
+                url = entity.url,
                 mensagemAlerta = entity.mensagem,                
                 mensagem = new Validate() { Code = 0, Message = "Registro incluído com sucesso", MessageBase = "Registro incluído com sucesso", MessageType = MsgType.SUCCESS }
             };
