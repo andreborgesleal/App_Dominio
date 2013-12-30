@@ -98,6 +98,11 @@ namespace App_Dominio.Controllers
             return f.getReport(report, controller, action);
         }
 
+        public virtual bool mustListOnLoad()
+        {
+            return true;
+        }
+
         [AuthorizeFilter]
         public virtual ActionResult Browse(int? index = 0, int pageSize = 50, string descricao = null)
         {
@@ -108,8 +113,11 @@ namespace App_Dominio.Controllers
 
             TempData.Remove("Controller");
             TempData.Add("Controller", this.ControllerContext.RouteData.Values["controller"].ToString());
-            
-            return List(index, this.PageSize, descricao);
+
+            if (mustListOnLoad())
+                return List(index, this.PageSize, descricao);
+            else
+                return View();
         }
 
         [AuthorizeFilter]
