@@ -193,5 +193,22 @@ namespace App_Dominio.Enumeracoes
         }
         #endregion
 
+        #region DropDownList AbertoFechado
+        /// <summary>
+        /// Retorna os valores constantes Aberto e Fechado para uma seleção 
+        /// </summary>
+        /// <param name="selectedValue">Item da lista que receberá o foco inicial</param>
+        /// <param name="header">Informar o cabeçalho do dropdownlist. Exemplo: "Selecione...". Observação: Se não informado o dropdownlist não terá cabeçalho.</param>
+        /// <returns></returns>
+        public static IEnumerable<SelectListItem> AbertoFechado(string selectedValue = "", string header = "")
+        {
+            List<SelectListItem> drp = new List<SelectListItem>() { 
+                new SelectListItem() { Value = Enumeradores.AbertoFechado.ABERTO.GetStringValue(), Text = Enumeradores.AbertoFechado.ABERTO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.AbertoFechado.FECHADO.GetStringValue(), Text = Enumeradores.AbertoFechado.FECHADO.GetStringDescription() }
+            };
+
+            return Funcoes.SelectListEnum(drp, selectedValue, header);
+        }
+        #endregion
     }
 }

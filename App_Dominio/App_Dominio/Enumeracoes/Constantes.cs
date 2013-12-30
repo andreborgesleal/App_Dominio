@@ -64,6 +64,19 @@ namespace App_Dominio.Enumeracoes
         }
 
         /// <summary>
+        /// Aberto ou Fechado
+        /// </summary>
+        public enum AbertoFechado
+        {
+            [StringDescription("Aberto")]
+            [StringValue("A")]
+            ABERTO,
+            [StringDescription("Fechado")]
+            [StringValue("F")]
+            FECHADO
+        }
+
+        /// <summary>
         /// Unidades Federativas
         /// </summary>
         public enum UnidadeFederativa
@@ -177,7 +190,6 @@ namespace App_Dominio.Enumeracoes
             FEMININO
         }
 
-
         /// <summary>
         /// Tipo de Telefone
         /// </summary>
@@ -259,9 +271,6 @@ namespace App_Dominio.Enumeracoes
             [StringValue("Clear")]
             CLEAR
         }
-
-
-
     }
 
 
