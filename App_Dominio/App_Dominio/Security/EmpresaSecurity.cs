@@ -280,9 +280,13 @@ namespace App_Dominio.Security
         #endregion
 
         #region retorna o Usuário da sessão corrente
+        /// <summary>
+        /// retorna o Usuário da sessão corrente
+        /// </summary>
+        /// <returns></returns>
         public Usuario getUsuario()
         {
-            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            using (seguranca_db = new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
                 if (_ValidarSessao(web.Session.SessionID))
@@ -293,6 +297,14 @@ namespace App_Dominio.Security
                 else
                     return null;
             }
+        }
+        #endregion
+
+        #region retorna o Usuário a partir de um ID
+        public Usuario getUsuarioById(int usuarioId)
+        {
+            using (seguranca_db = new SecurityContext())
+                return seguranca_db.Usuarios.Find(usuarioId);
         }
         #endregion
 
