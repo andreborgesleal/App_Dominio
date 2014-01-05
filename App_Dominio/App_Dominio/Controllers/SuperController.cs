@@ -566,11 +566,11 @@ namespace App_Dominio.Controllers
                 if (text == null)
                 {
                     text = new Dictionary<string, string>();
-                    text.Add("Edit", "Edição");
-                    text.Add("Details", "Detalhe");
-                    text.Add("Delete", "Exclusão");
+                    text.Add("edit", "Edição");
+                    text.Add("detail", "Detalhe");
+                    text.Add("delete", "Exclusão");
                 }
-                breadCrumbText = text[this.ControllerContext.RouteData.Values["action"].ToString()];
+                breadCrumbText = text[this.ControllerContext.RouteData.Values["action"].ToString().ToLower()];
             }
 
             return breadCrumbText;
