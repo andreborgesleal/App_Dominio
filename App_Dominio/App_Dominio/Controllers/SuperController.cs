@@ -779,6 +779,7 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Delete
+        [ValidateInput(false)]
         [HttpPost]
         [AuthorizeFilter]
         public virtual ActionResult Delete(R value, FormCollection collection)
