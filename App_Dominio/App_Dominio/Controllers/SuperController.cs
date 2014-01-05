@@ -600,14 +600,14 @@ namespace App_Dominio.Controllers
 
         #region Create
         [AuthorizeFilter]
-        public virtual ActionResult Create()
+        public virtual ActionResult Create(R value = null)
         {
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
             GetCreate();
 
-            return View(getModel().CreateRepository());
+            return View(getModel().CreateRepository(value));
         }
 
         [ValidateInput(false)]
@@ -933,6 +933,13 @@ namespace App_Dominio.Controllers
                         Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                     else
                         Attention(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                    
+                    value.mensagem = new Validate()
+                    {
+                        Code = ex.Result.Code,
+                        Message = ex.Result.Message,
+                        MessageBase = ex.Result.MessageBase
+                    };
                 }
                 catch (Exception ex)
                 {
@@ -940,6 +947,12 @@ namespace App_Dominio.Controllers
                     App_DominioException.saveError(ex, GetType().FullName);
                     ModelState.AddModelError("", MensagemPadrao.Message(17).ToString()); // mensagem amigável ao usuário
                     Error(ex.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                    value.mensagem = new Validate()
+                    {
+                        Code = 999,
+                        Message = MensagemPadrao.Message(999).ToString(),
+                        MessageBase = ModelState.Values.Where(erro => erro.Errors.Count > 0).First().Errors[0].ErrorMessage
+                    };
                 }
                 finally
                 {

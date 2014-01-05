@@ -16,7 +16,7 @@ namespace App_Dominio.Contratos
 
     public interface ICrudContext<R> where R : Repository
     {
-        R CreateRepository();
+        R CreateRepository(R value = null);
         R getObject(R id);
         Validate Validate(R value, App_Dominio.Enumeracoes.Crud operation);
         IEnumerable<R> ListAll();

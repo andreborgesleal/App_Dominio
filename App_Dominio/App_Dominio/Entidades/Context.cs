@@ -57,7 +57,7 @@ namespace App_Dominio.Entidades
 
         public abstract Validate Validate(R value, Crud operation);
 
-        public virtual R CreateRepository()
+        public virtual R CreateRepository(R value = null)
         {
             Type typeInstance = typeof(R);
             R Instance = (R)Activator.CreateInstance(typeInstance);
@@ -521,7 +521,7 @@ namespace App_Dominio.Entidades
 
         public abstract int Indexof(R key);
 
-        public virtual R CreateRepository()
+        public virtual R CreateRepository(R value = null)
         {
             Type typeInstance = typeof(R);
             R Instance = (R)Activator.CreateInstance(typeInstance);
