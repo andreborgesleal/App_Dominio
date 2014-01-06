@@ -77,7 +77,7 @@ namespace App_Dominio.Negocio
             return value.mensagem;
         }
 
-        public override UsuarioRepository CreateRepository(UsuarioRepository value = null)
+        public override UsuarioRepository CreateRepository()
         {
             return new UsuarioRepository();
         }

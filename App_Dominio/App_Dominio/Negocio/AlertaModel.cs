@@ -55,7 +55,7 @@ namespace App_Dominio.Negocio
             return value.mensagem;
         }
 
-        public override AlertaRepository CreateRepository(AlertaRepository value = null)
+        public override AlertaRepository CreateRepository()
         {
             return new AlertaRepository();
         }

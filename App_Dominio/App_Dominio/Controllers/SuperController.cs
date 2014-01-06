@@ -600,14 +600,14 @@ namespace App_Dominio.Controllers
 
         #region Create
         [AuthorizeFilter]
-        public virtual ActionResult Create(R value = null)
+        public virtual ActionResult Create()
         {
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
             GetCreate();
 
-            return View(getModel().CreateRepository(value));
+            return View(getModel().CreateRepository());
         }
 
         [ValidateInput(false)]
@@ -912,13 +912,20 @@ namespace App_Dominio.Controllers
     {
         #region CRUD
         #region Create
+        public virtual void BeforeCreate(ref R value, ICrudContext<R> model, FormCollection collection)
+        {
+
+        }
+
         public override R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
                 try
                 {
-                    if (s != null)
-                        s.beforeCreate(ref value, model, collection);
+                    //if (s != null)
+                    //    s.beforeCreate(ref value, model, collection);
+
+                    BeforeCreate(ref value, model, collection);
 
                     value = ((IProcessContext<R>)model).SaveAll(value);
                     if (value.mensagem.Code > 0)
