@@ -15,6 +15,10 @@ namespace App_Dominio.Repositories
         [Required]
         public int usuarioId { get; set; }
 
+        [DisplayName("Sistema")]
+        [Required]
+        public int sistemaId { get; set; }
+
         [DisplayName("Emissão")]
         [Required]
         public DateTime dt_emissao { get; set; }

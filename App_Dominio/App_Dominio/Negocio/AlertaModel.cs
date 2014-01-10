@@ -20,6 +20,7 @@ namespace App_Dominio.Negocio
             {
                 alertaId = value.alertaId,
                 usuarioId = value.usuarioId,
+                sistemaId = value.sistemaId,
                 dt_emissao = value.dt_emissao,
                 dt_leitura = value.dt_leitura,
                 linkText = value.linkText,
@@ -34,6 +35,7 @@ namespace App_Dominio.Negocio
             {
                 alertaId = entity.alertaId,
                 usuarioId = entity.usuarioId,
+                sistemaId = entity.sistemaId,
                 dt_emissao = entity.dt_emissao,
                 dt_leitura = entity.dt_leitura,
                 linkText = entity.linkText,

@@ -14,6 +14,8 @@ namespace App_Dominio.Entidades
 
         public int usuarioId { get; set; }
 
+        public int sistemaId { get; set; }
+
         public DateTime dt_emissao { get; set; }
 
         public Nullable<DateTime> dt_leitura { get; set; }
@@ -24,7 +26,9 @@ namespace App_Dominio.Entidades
 
         public string mensagem { get; set; }
 
-        public virtual Usuario usuario { get; set; }
+        public virtual Usuario Usuario { get; set; }
+
+        public virtual Sistema Sistema { get; set; }
 
     }
 }

@@ -97,8 +97,20 @@ namespace App_Dominio.Security
                     Usuario usu = seguranca_db.Usuarios.Find(int.Parse(validate.Field));
                     #endregion
 
-                    #region insere a sessao
                     System.Web.HttpContext web = System.Web.HttpContext.Current;
+
+                    #region Validar Sessão
+                    if (_ValidarSessao(web.Session.SessionID))
+                    {
+                        validate.Code = 201;
+                        validate.Message = MensagemPadrao.Message(201).text;
+                        validate.MessageBase = "Sessão já está em uso. Tente novamente mais tarde ou contate o Administrador do sistema.";
+                        return validate;
+                    }
+                    #endregion
+
+                    #region insere a sessao
+                    
                     Sessao s1 = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
                     if (s1 == null)
@@ -320,6 +332,7 @@ namespace App_Dominio.Security
 
                     IEnumerable<Alerta> q = from a in seguranca_db.Alertas
                                             where a.usuarioId == sessaoCorrente.usuarioId
+                                                    && a.sistemaId == sessaoCorrente.sistemaId 
                                                     && a.dt_leitura == null
                                             select a;
                     return q;
@@ -344,6 +357,7 @@ namespace App_Dominio.Security
 
                     IEnumerable<AlertaRepository> q = (from a in seguranca_db.Alertas
                                                        where a.usuarioId == sessaoCorrente.usuarioId
+                                                               && a.sistemaId == sessaoCorrente.sistemaId 
                                                                && a.dt_emissao >= seisDias
                                                        orderby a.dt_emissao descending
                                                        select new AlertaRepository()
@@ -352,6 +366,7 @@ namespace App_Dominio.Security
                                                            dt_emissao = a.dt_emissao,
                                                            dt_leitura = a.dt_leitura,
                                                            usuarioId = a.usuarioId,
+                                                           sistemaId = a.sistemaId,
                                                            linkText = a.linkText,
                                                            url = a.url,
                                                            mensagemAlerta = a.mensagem
