@@ -83,6 +83,9 @@
     <Compile Include="Entidades\GrupoTransacao.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Entidades\LogAuditoria.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Entidades\SecurityContext.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -109,6 +112,9 @@
     </Compile>
     <Compile Include="Repositories\ButtonRepository.cs" />
     <Compile Include="Repositories\FiltroRepository.cs" />
+    <Compile Include="Repositories\LogAuditoriaRepository.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Repositories\TransacaoRepository.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -119,7 +125,6 @@
     <Compile Include="Security\App_DominioException.cs" />
     <Compile Include="Security\AuthorizeFilter.cs" />
     <Compile Include="Security\EmpresaSecurity.cs" />
-    <Compile Include="Security\LogAuditoria.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

@@ -9,16 +9,19 @@ namespace App_Dominio.Entidades
     public class GrupoTransacao
     {
         [Key, Column(Order = 0)]
-        [DisplayName("ID Grupo")]
+        [DisplayName("ID_Grupo")]
         public int grupoId { get; set; }
 
         [Key, Column(Order = 1)]
-        [DisplayName("ID Transacao")]
+        [DisplayName("ID_Transacao")]
         public int transacaoId { get; set; }
-        
+
+        [DisplayName("Situação")]
         public string situacao { get; set; }
 
+        [DisplayName("Grupo")]
         public virtual Grupo Grupo { get; set; }
+        [DisplayName("Transação")]
         public virtual Transacao Transacao { get; set; }
     }
 }

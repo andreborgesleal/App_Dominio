@@ -125,6 +125,7 @@ namespace App_Dominio.Security
                             dt_criacao= DateTime.Now,
                             dt_atualizacao = DateTime.Now,
                             isOnline = "S",
+                            ip = web.Request.UserHostAddress,
                             value1 = value1,
                             value2 = value2,
                             value3 = value3,
@@ -144,6 +145,7 @@ namespace App_Dominio.Security
                         sessao.dt_desativacao = null;
                         sessao.dt_atualizacao = DateTime.Now;
                         sessao.isOnline = "S";
+                        sessao.ip = web.Request.UserHostAddress;
                         sessao.value1 = value1;
                         sessao.value2 = value2;
                         sessao.value3 = value3;

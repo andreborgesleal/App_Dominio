@@ -9,27 +9,37 @@ namespace App_Dominio.Entidades
     public class Usuario
     {
         [Key]
-        [DisplayName("ID Usuário")]
+        [DisplayName("ID")]
         public int usuarioId { get; set; }
 
+        [DisplayName("ID_Empresa")]
         public int empresaId { get; set; }
 
+        [DisplayName("Login")]
         public string login { get; set; }
 
+        [DisplayName("Nome")]
         public string nome { get; set; }
 
+        [DisplayName("Dt_Cadastro")]
         public DateTime dt_cadastro { get; set; }
 
+        [DisplayName("Situação")]
         public string situacao { get; set; }
 
+        [DisplayName("Administrador")]
         public string isAdmin { get; set; }
 
+        [DisplayName("Senha")]
         public string senha { get; set; }
 
+        [DisplayName("Keyword")]
         public string keyword { get; set; }
 
+        [DisplayName("Dt_Keyword")]
         public Nullable<DateTime> dt_keyword { get; set; }
 
+        [DisplayName("Empresa")]
         public virtual Empresa empresa { get; set;}
 
     }

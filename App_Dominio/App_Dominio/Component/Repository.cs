@@ -19,6 +19,9 @@ namespace App_Dominio.Component
         [DisplayName("Empresa")]
         public int empresaId { get; set; }
 
+        [DisplayName("Url")]
+        public string uri { get; set; }
+
         [DisplayName("Mensagem")]
         public Validate mensagem { get; set; }
 

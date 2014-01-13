@@ -25,5 +25,6 @@ namespace App_Dominio.Entidades
         public DbSet<Transacao> Transacaos { get; set; }
         public DbSet<UsuarioGrupo> UsuarioGrupos { get; set; }
         public DbSet<GrupoTransacao> GrupoTransacaos { get; set; }
+        public DbSet<LogAuditoria> LogAuditorias { get; set; }
     }
 }

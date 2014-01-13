@@ -44,10 +44,13 @@ namespace App_Dominio.Entidades
         }
 
         public Sessao sessaoCorrente { get; set; }
+
     }
 
     public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R> where E : class where R : Repository where D : DbContext
     {
+        public LogAuditoria logAuditoria { get; set; }
+
         #region Métodos virtuais 
         public abstract E MapToEntity(R value);
 
@@ -63,6 +66,53 @@ namespace App_Dominio.Entidades
             R Instance = (R)Activator.CreateInstance(typeInstance);
 
             return Instance;
+        }
+
+        public virtual void SaveLog(E entity, string url, string operacao = "Atualizar", string tag = null)
+        {
+            #region Log de Auditoria
+            System.Reflection.PropertyInfo[] atributes = entity.GetType().GetProperties();
+
+            string displayName = "";
+            string notacao = "<?xml version=\"1.0\"?>\r\n";
+            notacao += "<" + entity.GetType().Name + ">\r\n";
+            notacao += "<Ação>" + operacao + "</Ação>\r\n";
+
+            for (int i = 0; i <= atributes.Count() - 1; i++)
+            {
+                if (atributes[i].CustomAttributes.Count() > 0 && atributes[i].CustomAttributes.LastOrDefault().ToString().Contains("DisplayNameAttribute"))
+                    displayName = atributes[i].CustomAttributes.LastOrDefault().ToString().Replace("[System.ComponentModel.DisplayNameAttribute(\"", "").Replace("\")]", "");
+                else
+                    displayName = atributes[i].Name;
+
+                if (displayName.ToLower() != "xml")
+                {
+                    if (atributes[i].GetValue(entity) != null)
+                        notacao += "<" + displayName + ">" + atributes[i].GetValue(entity).ToString() + "</" + displayName + ">\r\n";
+                    else
+                        notacao += "<" + displayName + "></" + displayName + ">\r\n";                
+                }
+            }
+
+            if (tag != null && tag != "")
+                notacao += "<tag>" + tag + "</tag>\r\n";
+
+            notacao += "</" + entity.GetType().Name + ">\r\n";
+
+            int _transacaoId = (from t in seguranca_db.Transacaos where t.url.ToLower() == url.ToLower() && t.sistemaId == sessaoCorrente.sistemaId select t.transacaoId).FirstOrDefault();
+
+            logAuditoria = new LogAuditoria()
+            {
+                dt_log = DateTime.Now,
+                empresaId = sessaoCorrente.empresaId,
+                usuarioId = sessaoCorrente.usuarioId,
+                ip = sessaoCorrente.ip,
+                transacaoId = _transacaoId,
+                notacao = notacao
+            };
+            this.seguranca_db.Set<LogAuditoria>().Add(logAuditoria);
+            
+            #endregion
         }
         #endregion
 
@@ -119,65 +169,79 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
-                try
+                using (seguranca_db = new SecurityContext())
                 {
-                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
-
-                    #region validar inclusão
-                    value.mensagem = this.Validate(value, Crud.INCLUIR);
-                    #endregion
-
-                    #region insere o registro
-                    if (value.mensagem.Code == 0)
+                    try
                     {
-                        #region Mapear repository para entity
-                        E entity = MapToEntity(value);
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        
+                        value.empresaId = sessaoCorrente.empresaId;
+
+                        #region validar inclusão
+                        value.mensagem = this.Validate(value, Crud.INCLUIR);
                         #endregion
 
-                        this.db.Set<E>().Add(entity);
-                        db.SaveChanges();
-                        value = MapToRepository(entity);
-                    }
-                    #endregion
-                }
-                catch (ArgumentException ex)
-                {
-                    value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
-                }
-                catch (DbUpdateException ex)
-                {
-                    value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
-                    if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
-                    {
-                        value.mensagem.Code = 45;
-                        value.mensagem.Message = MensagemPadrao.Message(28).ToString();
-                        value.mensagem.MessageType = MsgType.ERROR;
-                    }
-                    else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
-                    {
-                        value.mensagem.Code = 37;
-                        value.mensagem.Message = MensagemPadrao.Message(37).ToString();
-                        value.mensagem.MessageType = MsgType.WARNING;
-                    }
-                    else
-                    {
-                        value.mensagem.Code = 44;
-                        value.mensagem.Message = MensagemPadrao.Message(44).ToString();
-                        value.mensagem.MessageType = MsgType.ERROR;
-                    }
+                        #region insere o registro
+                        if (value.mensagem.Code == 0)
+                        {
+                            string _url = value.uri;
+                            #region Mapear repository para entity
+                            E entity = MapToEntity(value);
+                            #endregion
 
+                            this.db.Set<E>().Add(entity);
+                            db.SaveChanges();
+                            value = MapToRepository(entity);
+
+                            #region Log de Auditoria
+                            SaveLog(entity, _url, "Inclusão");
+                            seguranca_db.SaveChanges();
+                            #endregion
+                        }
+                        #endregion
+
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            value.mensagem.Code = 45;
+                            value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+                        else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                        {
+                            value.mensagem.Code = 37;
+                            value.mensagem.Message = MensagemPadrao.Message(37).ToString();
+                            value.mensagem.MessageType = MsgType.WARNING;
+                        }
+                        else
+                        {
+                            value.mensagem.Code = 44;
+                            value.mensagem.Message = MensagemPadrao.Message(44).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        value.mensagem.Code = 17;
+                        value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                        value.mensagem.MessageType = MsgType.ERROR;
+                    }
                 }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
-                }
-                catch (Exception ex)
-                {
-                    value.mensagem.Code = 17;
-                    value.mensagem.Message = MensagemPadrao.Message(17).ToString();
-                    value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
-                    value.mensagem.MessageType = MsgType.ERROR;
-                }
+
             }
 
             return value;
@@ -190,63 +254,76 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
-                try
+                using (seguranca_db = new SecurityContext())
                 {
-                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
-
-                    #region validar alteração
-                    value.mensagem = this.Validate(value, Crud.ALTERAR);
-                    #endregion
-
-                    #region altera o registro
-                    if (value.mensagem.Code == 0)
+                    try
                     {
-                        #region Mapear repository para entity
-                        E entity = MapToEntity(value);
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                        value.empresaId = sessaoCorrente.empresaId;
+
+                        #region validar alteração
+                        value.mensagem = this.Validate(value, Crud.ALTERAR);
                         #endregion
 
-                        db.Entry(entity).State = EntityState.Modified;
-                        db.SaveChanges();
+                        #region altera o registro
+                        if (value.mensagem.Code == 0)
+                        {
+                            string _url = value.uri;
+                            #region Mapear repository para entity
+                            E entity = MapToEntity(value);
+                            #endregion
+
+                            db.Entry(entity).State = EntityState.Modified;
+                            db.SaveChanges();
+
+                            #region Log de Auditoria
+                            SaveLog(entity, _url, "Alteração");
+                            seguranca_db.SaveChanges();
+                            #endregion
+                        }
+                        #endregion
                     }
-                    #endregion
-                }
-                catch (ArgumentException ex)
-                {
-                    value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
-                }
-                catch (DbUpdateException ex)
-                {
-                    value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
-                    if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                    catch (ArgumentException ex)
                     {
-                        value.mensagem.Code = 28;
-                        value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            value.mensagem.Code = 28;
+                            value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+                        else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                        {
+                            value.mensagem.Code = 37;
+                            value.mensagem.Message = MensagemPadrao.Message(37).ToString();
+                            value.mensagem.MessageType = MsgType.WARNING;
+                        }
+                        else
+                        {
+                            value.mensagem.Code = 43;
+                            value.mensagem.Message = MensagemPadrao.Message(42).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 43, Message = MensagemPadrao.Message(43).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        value.mensagem.Code = 17;
+                        value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
                         value.mensagem.MessageType = MsgType.ERROR;
                     }
-                    else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
-                    {
-                        value.mensagem.Code = 37;
-                        value.mensagem.Message = MensagemPadrao.Message(37).ToString();
-                        value.mensagem.MessageType = MsgType.WARNING;
-                    }
-                    else
-                    {
-                        value.mensagem.Code = 43;
-                        value.mensagem.Message = MensagemPadrao.Message(42).ToString();
-                        value.mensagem.MessageType = MsgType.ERROR;
-                    }
-                    
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    value.mensagem = new Validate() { Code = 43, Message = MensagemPadrao.Message(43).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
-                }
-                catch (Exception ex)
-                {
-                    value.mensagem.Code = 17;
-                    value.mensagem.Message = MensagemPadrao.Message(17).ToString();
-                    value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
-                    value.mensagem.MessageType = MsgType.ERROR;
+
                 }
             }
 
@@ -259,54 +336,67 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
-                try
+                using (seguranca_db = new SecurityContext())
                 {
-                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
+                    try
+                    {
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                    #region validar exclusão
-                    value.mensagem = this.Validate(value, Crud.EXCLUIR);
-                    #endregion
+                        value.empresaId = sessaoCorrente.empresaId;
 
-                    #region excluir o registro
-                    if (value.mensagem.Code == 0)
-                    {
-                        E entity = this.Find(value);
-                        if (entity == null)
-                            throw new ArgumentException("Objeto não identificado para exclusão");
-                        this.db.Set<E>().Remove(entity);
-                        db.SaveChanges();
+                        #region validar exclusão
+                        value.mensagem = this.Validate(value, Crud.EXCLUIR);
+                        #endregion
+
+                        #region excluir o registro
+                        if (value.mensagem.Code == 0)
+                        {
+                            string _url = value.uri;
+
+                            E entity = this.Find(value);
+                            if (entity == null)
+                                throw new ArgumentException("Objeto não identificado para exclusão");
+                            this.db.Set<E>().Remove(entity);
+                            db.SaveChanges();
+
+                            #region Log de Auditoria
+                            SaveLog(entity, _url, "Exclusão");
+                            seguranca_db.SaveChanges();
+                            #endregion
+                        }
+                        #endregion
                     }
-                    #endregion
-                }
-                catch (ArgumentException ex)
-                {
-                    value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
-                }
-                catch (DbUpdateException ex)
-                {
-                    value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
-                    if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                    catch (ArgumentException ex)
                     {
-                        value.mensagem.Code = 16;
-                        value.mensagem.Message = MensagemPadrao.Message(16).ToString();
+                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
                     }
-                    else
+                    catch (DbUpdateException ex)
                     {
-                        value.mensagem.Code = 42;
-                        value.mensagem.Message = MensagemPadrao.Message(42).ToString();
+                        value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            value.mensagem.Code = 16;
+                            value.mensagem.Message = MensagemPadrao.Message(16).ToString();
+                        }
+                        else
+                        {
+                            value.mensagem.Code = 42;
+                            value.mensagem.Message = MensagemPadrao.Message(42).ToString();
+                        }
+                        value.mensagem.MessageType = MsgType.ERROR;
                     }
-                    value.mensagem.MessageType = MsgType.ERROR;
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    value.mensagem = new Validate() { Code = 44, Message = MensagemPadrao.Message(44).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
-                }
-                catch (Exception ex)
-                {
-                    value.mensagem.Code = 17;
-                    value.mensagem.Message = MensagemPadrao.Message(17).ToString();
-                    value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
-                    value.mensagem.MessageType = MsgType.ERROR;
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 44, Message = MensagemPadrao.Message(44).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        value.mensagem.Code = 17;
+                        value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                        value.mensagem.MessageType = MsgType.ERROR;
+                    }
                 }
             }
 
@@ -398,89 +488,102 @@ namespace App_Dominio.Entidades
 
             using (db = getContextInstance())
             {
-                try
+                using (seguranca_db = new SecurityContext())
                 {
-                    // exclui todo mundo para incluir novamente
-                    IEnumerable<E> entities = db.Set<E>().Where(where);
-
-                    foreach (E entity in db.Set<E>().Where(where))
+                    try
                     {
-                        this.db.Set<E>().Remove(entity);
-                    }
+                        // exclui todo mundo para incluir novamente
+                        IEnumerable<E> entities = db.Set<E>().Where(where);
 
-                    db.SaveChanges();
-
-                    // Inclui novamente
-                    foreach (R value in values)
-                    {
-                        value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
-                        Crud op = Crud.INCLUIR;
-
-                        if (Find(value) != null)
-                            op = Crud.ALTERAR;
-
-                        #region validar alteração
-                        value.mensagem = this.Validate(value, op);
-                        #endregion
-
-                        #region inclui/altera o registro
-                        if (value.mensagem.Code == 0)
+                        foreach (E entity in db.Set<E>().Where(where))
                         {
-                            #region Mapear repository para entity
-                            E entity = MapToEntity(value);
+                            this.db.Set<E>().Remove(entity);
+
+                            #region Log de Auditoria
+                            SaveLog(entity, values.FirstOrDefault().uri, "Exclusão");
+                            #endregion
+                        }
+
+                        db.SaveChanges();
+                        seguranca_db.SaveChanges();
+
+                        // Inclui novamente
+                        foreach (R value in values)
+                        {
+                            value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
+                            Crud op = Crud.INCLUIR;
+
+                            if (Find(value) != null)
+                                op = Crud.ALTERAR;
+
+                            #region validar alteração
+                            value.mensagem = this.Validate(value, op);
                             #endregion
 
-                            if (op == Crud.ALTERAR)
-                                db.Entry(entity).State = EntityState.Modified;
-                            else
-                                this.db.Set<E>().Add(entity);
+                            #region inclui/altera o registro
+                            if (value.mensagem.Code == 0)
+                            {
+                                #region Mapear repository para entity
+                                E entity = MapToEntity(value);
+                                #endregion
+
+                                if (op == Crud.ALTERAR)
+                                    db.Entry(entity).State = EntityState.Modified;
+                                else
+                                    this.db.Set<E>().Add(entity);
+
+                                #region Log de Auditoria
+                                SaveLog(entity, value.uri, "Inclusão");
+                                #endregion
+                            }
+                            #endregion
                         }
-                        #endregion
+
+                        db.SaveChanges();
+                        seguranca_db.SaveChanges();
+
+                        mensagem = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
+
                     }
-
-                    db.SaveChanges();
-
-                    mensagem = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
-                    
-                }
-                catch (ArgumentException ex)
-                {
-                    return new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
-                }
-                catch (DbUpdateException ex)
-                {
-                    
-                    mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
-                    if (mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                    catch (ArgumentException ex)
                     {
-                        mensagem.Code = 28;
-                        mensagem.Message = MensagemPadrao.Message(28).ToString();
+                        return new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+
+                        mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            mensagem.Code = 28;
+                            mensagem.Message = MensagemPadrao.Message(28).ToString();
+                            mensagem.MessageType = MsgType.ERROR;
+                        }
+                        else if (mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                        {
+                            mensagem.Code = 37;
+                            mensagem.Message = MensagemPadrao.Message(37).ToString();
+                            mensagem.MessageType = MsgType.WARNING;
+                        }
+                        else
+                        {
+                            mensagem.Code = 43;
+                            mensagem.Message = MensagemPadrao.Message(42).ToString();
+                            mensagem.MessageType = MsgType.ERROR;
+                        }
+
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        return new Validate() { Code = 43, Message = MensagemPadrao.Message(43).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        mensagem.Code = 17;
+                        mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
                         mensagem.MessageType = MsgType.ERROR;
                     }
-                    else if (mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
-                    {
-                        mensagem.Code = 37;
-                        mensagem.Message = MensagemPadrao.Message(37).ToString();
-                        mensagem.MessageType = MsgType.WARNING;
-                    }
-                    else
-                    {
-                        mensagem.Code = 43;
-                        mensagem.Message = MensagemPadrao.Message(42).ToString();
-                        mensagem.MessageType = MsgType.ERROR;
-                    }
-
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    return new Validate() { Code = 43, Message = MensagemPadrao.Message(43).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
-                }
-                catch (Exception ex)
-                {
-                    mensagem.Code = 17;
-                    mensagem.Message = MensagemPadrao.Message(17).ToString();
-                    mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
-                    mensagem.MessageType = MsgType.ERROR;
                 }
             }
 
@@ -663,66 +766,79 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
-                try
+                using (seguranca_db = new SecurityContext())
                 {
-                    value.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
-
-                    #region validar inclusão
-                    value.mensagem = this.Validate(value, Crud.INCLUIR);
-                    #endregion
-
-                    #region insere os registros
-                    if (value.mensagem.Code == 0)
+                    try
                     {
-                        E entity = ExecProcess(value);
-                        db.SaveChanges();
-                        value = MapToRepository(entity);
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                        // só deverá ser implementado se não for executar operações na conexão atual.
-                        // caso contrário deverá ser feito dentro do método ExecProcess
-                        value.mensagem = AfterInsert(value);
-                        if (value.mensagem.Code > 0)
-                            throw new DbUpdateException(value.mensagem.MessageBase);
+                        value.empresaId = sessaoCorrente.empresaId;
+
+                        #region validar inclusão
+                        value.mensagem = this.Validate(value, Crud.INCLUIR);
+                        #endregion
+
+                        #region insere os registros
+                        if (value.mensagem.Code == 0)
+                        {
+                            string _url = value.uri;
+                            E entity = ExecProcess(value);
+                            db.SaveChanges();
+                            value = MapToRepository(entity);
+                            value.uri = _url;
+
+                            // só deverá ser implementado se não for executar operações na conexão atual.
+                            // caso contrário deverá ser feito dentro do método ExecProcess
+                            value.mensagem = AfterInsert(value);
+                            if (value.mensagem.Code > 0)
+                                throw new DbUpdateException(value.mensagem.MessageBase);
+
+                            #region Log de Auditoria
+                            SaveLog(entity, _url);
+                            seguranca_db.SaveChanges();
+                            #endregion
+                        }
+                        #endregion
                     }
-                    #endregion
-                }
-                catch (ArgumentException ex)
-                {
-                    value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
-                }
-                catch (DbUpdateException ex)
-                {
-                    value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
-                    if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                    catch (ArgumentException ex)
                     {
-                        value.mensagem.Code = 45;
-                        value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            value.mensagem.Code = 45;
+                            value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+                        else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                        {
+                            value.mensagem.Code = 37;
+                            value.mensagem.Message = MensagemPadrao.Message(37).ToString();
+                            value.mensagem.MessageType = MsgType.WARNING;
+                        }
+                        else
+                        {
+                            value.mensagem.Code = 44;
+                            value.mensagem.Message = MensagemPadrao.Message(44).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        value.mensagem.Code = 17;
+                        value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
                         value.mensagem.MessageType = MsgType.ERROR;
                     }
-                    else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
-                    {
-                        value.mensagem.Code = 37;
-                        value.mensagem.Message = MensagemPadrao.Message(37).ToString();
-                        value.mensagem.MessageType = MsgType.WARNING;
-                    }
-                    else
-                    {
-                        value.mensagem.Code = 44;
-                        value.mensagem.Message = MensagemPadrao.Message(44).ToString();
-                        value.mensagem.MessageType = MsgType.ERROR;
-                    }
-
-                }
-                catch (System.Data.Entity.Validation.DbEntityValidationException ex)
-                {
-                    value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
-                }
-                catch (Exception ex)
-                {
-                    value.mensagem.Code = 17;
-                    value.mensagem.Message = MensagemPadrao.Message(17).ToString();
-                    value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
-                    value.mensagem.MessageType = MsgType.ERROR;
                 }
             }
 
