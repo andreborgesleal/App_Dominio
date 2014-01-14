@@ -401,19 +401,19 @@ namespace App_Dominio.Models
                     //data1 = "01/" + DateTime.Today.ToString("MM/yyyy");
                     //data2 = ("01/" + DateTime.Today.AddMonths(1).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
                     data1 = DateTime.Today.ToString("yyyy-MM-") + "01"  ;
-                    data2 = (DateTime.Today.AddMonths(1).ToString("yyyy-MM-") + "01").AddDays(-1).ToString("yyyy-MM-dd");                    
+                    data2 = DateTime.Parse(DateTime.Today.AddMonths(1).ToString("yyyy-MM-") + "01").AddDays(-1).ToString("yyyy-MM-dd");                    
                     break;
                 case "Mês Anterior":
                     data1 = "01/" + DateTime.Today.AddMonths(-1).ToString("MM/yyyy");
-                    data2 = ("01/" + DateTime.Today.AddMonths(1).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
+                    data2 = DateTime.Parse("01/" + DateTime.Today.AddMonths(1).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
                     break;
                 case "Próximo mês":
                     data1 = DateTime.Today.ToString("dd/MM/yyyy");
-                    data2 = ("01/" + DateTime.Today.AddMonths(2).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
+                    data2 = DateTime.Parse("01/" + DateTime.Today.AddMonths(2).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
                     break;
                 case "Últimos 3 meses":
                     data1 = "01/" + DateTime.Today.AddMonths(-3).ToString("MM/yyyy");
-                    data2 = ("01/" + DateTime.Today.AddMonths(1).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
+                    data2 = DateTime.Parse("01/" + DateTime.Today.AddMonths(1).ToString("MM/yyyy")).AddDays(-1).ToString("dd/MM/yyyy");
                     break;
                 case "Ano atual":
                     data1 = "01/01/" + DateTime.Today.ToString("yyyy");
@@ -421,7 +421,7 @@ namespace App_Dominio.Models
                     break;
             }
 
-            DateTime[] datas = { (data1), (data2) };
+            DateTime[] datas = { DateTime.Parse(data1), DateTime.Parse(data2) };
             
             return datas;
         }

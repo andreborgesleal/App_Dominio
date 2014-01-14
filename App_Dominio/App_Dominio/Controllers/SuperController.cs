@@ -637,6 +637,10 @@ namespace App_Dominio.Controllers
             BindBreadCrumb(breadCrumbText);
         }
 
+        public virtual void BeforeCreate(ref R value, ICrudContext<R> model, FormCollection collection)
+        {
+
+        }
         public virtual R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
@@ -644,6 +648,8 @@ namespace App_Dominio.Controllers
                 {
                     if (s != null)
                         s.beforeCreate(ref value, model, collection);
+                    else
+                        BeforeCreate(ref value, model, collection);
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
@@ -734,6 +740,8 @@ namespace App_Dominio.Controllers
             return getModel().getObject(key);
         }
 
+        public virtual void BeforeEdit(ref R value, ICrudContext<R> model, FormCollection collection) { }
+
         public virtual R SetEdit(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
@@ -741,6 +749,8 @@ namespace App_Dominio.Controllers
                 {
                     if (s != null)
                         s.beforeEdit(ref value, model);
+                    else
+                        BeforeEdit(ref value, model, collection);
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
@@ -814,7 +824,7 @@ namespace App_Dominio.Controllers
             else
                 return View(ret);
         }
-
+        public virtual void BeforeDelete(ref R value, ICrudContext<R> model, FormCollection collection) { }
         public virtual R SetDelete(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)
         {
             if (ModelState.IsValid)
@@ -822,6 +832,8 @@ namespace App_Dominio.Controllers
                 {
                     if (s != null)
                         s.beforeDelete(ref value, model);
+                    else
+                        BeforeDelete(ref value, model, collection);
                     
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
@@ -924,11 +936,6 @@ namespace App_Dominio.Controllers
     {
         #region CRUD
         #region Create
-        public virtual void BeforeCreate(ref R value, ICrudContext<R> model, FormCollection collection)
-        {
-
-        }
-
         public override R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
@@ -1104,7 +1111,6 @@ namespace App_Dominio.Controllers
         #endregion
         #endregion
     }
-
 
     public abstract class RootItemController<M, T, I, P> : RootController<M, T>
         where M : Repository
