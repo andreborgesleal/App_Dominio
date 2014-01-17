@@ -76,6 +76,7 @@
     <Compile Include="Entidades\App_DominioContext.cs" />
     <Compile Include="Entidades\Context.cs" />
     <Compile Include="Entidades\Empresa.cs" />
+    <Compile Include="Entidades\EmpresaSistema.cs" />
     <Compile Include="Entidades\Filtro.cs" />
     <Compile Include="Entidades\Grupo.cs">
       <SubType>Code</SubType>
