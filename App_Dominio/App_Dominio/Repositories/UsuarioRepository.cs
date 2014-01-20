@@ -1,5 +1,7 @@
 ﻿using App_Dominio.Component;
+using App_Dominio.Entidades;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -10,9 +12,6 @@ namespace App_Dominio.Repositories
     {
         [DisplayName("ID")]
         public int usuarioId { get; set; }
-
-        [DisplayName("Empresa ID")]
-        public int empresaId { get; set; }
 
         [Required]
         [DataType(DataType.EmailAddress, ErrorMessage = "Informe um e-mail válido")]
@@ -38,8 +37,14 @@ namespace App_Dominio.Repositories
         [DataType(DataType.Password)]
         public string senha { get; set; }
 
+        [DataType(DataType.Password)]
+        [DisplayName("Confirmar Senha")]
+        public string confirmacaoSenha { get; set; }
+
         public string keyword { get; set; }
 
         public Nullable<DateTime> dt_keyword { get; set; }
+
+        public string nome_grupo { get; set; }
     }
 }

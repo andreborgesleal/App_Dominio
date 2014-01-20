@@ -15,16 +15,18 @@ namespace App_Dominio.Negocio
         #region Métodos da classe CrudContext
         public override Usuario MapToEntity(UsuarioRepository value)
         {
+            EmpresaSecurity<SecurityContext> security = new EmpresaSecurity<SecurityContext>();
+
             return new Usuario()
             {
                 usuarioId = value.usuarioId,
                 empresaId = value.empresaId,
                 login = value.login,
                 nome = value.nome,
-                dt_cadastro = value.dt_cadastro,
+                dt_cadastro = DateTime.Now,
                 situacao = value.situacao,
                 isAdmin = value.isAdmin,
-                senha = value.senha,
+                senha = security.Criptografar(value.senha),
                 keyword = value.keyword,
                 dt_keyword = value.dt_keyword
             };
@@ -41,7 +43,6 @@ namespace App_Dominio.Negocio
                 dt_cadastro = entity.dt_cadastro,
                 situacao = entity.situacao,
                 isAdmin = entity.isAdmin,
-                senha = entity.senha,
                 keyword = entity.keyword,
                 dt_keyword = entity.dt_keyword,
                 mensagem = new Validate() { Code = 0, Message = "Registro incluído com sucesso", MessageBase = "Registro incluído com sucesso", MessageType = MsgType.SUCCESS }
@@ -112,6 +113,7 @@ namespace App_Dominio.Negocio
                         situacao = usu.situacao,
                         isAdmin = usu.isAdmin,
                         senha = usu.senha,
+                        nome_grupo = gru.descricao,
                         keyword = usu.keyword,
                         dt_keyword = usu.dt_keyword,
                         PageSize = pageSize,
