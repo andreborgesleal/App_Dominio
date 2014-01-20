@@ -67,6 +67,18 @@
     <Compile Include="Contratos\IReportRepository.cs" />
     <Compile Include="Contratos\ISecurity.cs" />
     <Compile Include="Contratos\IValidate.cs" />
+    <Compile Include="Controllers\ProcessController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\ReportController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\RootController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\RootItemController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controllers\SuperController.cs" />
     <Compile Include="Component\ListViewRepository.cs" />
     <Compile Include="Component\MiniCrud.cs" />
@@ -76,7 +88,9 @@
     <Compile Include="Entidades\App_DominioContext.cs" />
     <Compile Include="Entidades\Context.cs" />
     <Compile Include="Entidades\Empresa.cs" />
-    <Compile Include="Entidades\EmpresaSistema.cs" />
+    <Compile Include="Entidades\EmpresaSistema.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Entidades\Filtro.cs" />
     <Compile Include="Entidades\Grupo.cs">
       <SubType>Code</SubType>

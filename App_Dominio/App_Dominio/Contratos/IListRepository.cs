@@ -20,6 +20,11 @@ namespace App_Dominio.Contratos
         IEnumerable<FiltroRepository> getFiltros(string report, string controllerName, string actionName, int pageSize = 50);
     }
 
+    public interface IListSelectItem : IListRepository
+    {
+        IEnumerable<SelectListItem> getListItems(params object[] param);
+    }
+
     public interface IListReportRepository<R> where R : Repository
     {
         IPagedList getPagedList(int? index, string report, string controllerName, string actionName, int pageSize = 50, params object[] param);
@@ -34,3 +39,5 @@ namespace App_Dominio.Contratos
     }
 
 }
+
+

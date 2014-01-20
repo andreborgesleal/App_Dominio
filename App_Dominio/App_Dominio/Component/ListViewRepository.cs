@@ -209,4 +209,24 @@ namespace App_Dominio.Component
 
     }
 
+
+    public abstract class SelectListViewRepository<R, D> : ListViewRepository<R, D>, IListSelectItem
+        where R : Repository
+        where D : DbContext
+    {
+        #region Métodos da interface IListSelectItem
+        public virtual IEnumerable<SelectListItem> getListItems(params object[] param)
+        {
+            IEnumerable<Repository> list = this.ListRepository(0, 100, param);
+            IList<SelectListItem> listItems = new List<SelectListItem>();
+
+            foreach(R r in list)
+                listItems.Add(new SelectListItem() { Value = getValue(r), Text = getText(r) });
+
+            return listItems;
+        }
+        public abstract string getValue(R value);
+        public abstract string getText(R value);
+        #endregion
+    }
 }

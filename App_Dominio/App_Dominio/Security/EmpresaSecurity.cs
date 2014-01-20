@@ -100,20 +100,20 @@ namespace App_Dominio.Security
                     System.Web.HttpContext web = System.Web.HttpContext.Current;
 
                     #region Validar Sessão
-                    if (_ValidarSessao(web.Session.SessionID))
+                    Sessao s = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                    if (s != null && s.dt_desativacao == null && s.dt_atualizacao.AddMinutes(Timeout) >= DateTime.Now && s.usuarioId != usu.usuarioId)
                     {
                         validate.Code = 201;
                         validate.Message = MensagemPadrao.Message(201).text;
                         validate.MessageBase = "Sessão já está em uso. Tente novamente mais tarde ou contate o Administrador do sistema.";
-                        return validate;
+                        return validate;                        
                     }
                     #endregion
 
                     #region insere a sessao
-                    
-                    Sessao s1 = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                    //Sessao s1 = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                    if (s1 == null)
+                    if (s == null)
                     {
                         Sessao sessao = new Sessao()
                         {
@@ -122,14 +122,14 @@ namespace App_Dominio.Security
                             usuarioId = usu.usuarioId,
                             empresaId = usu.empresaId,
                             login = usu.login,
-                            dt_criacao= DateTime.Now,
+                            dt_criacao = DateTime.Now,
                             dt_atualizacao = DateTime.Now,
                             isOnline = "S",
                             ip = web.Request.UserHostAddress,
                             value1 = value1,
                             value2 = value2,
                             value3 = value3,
-                            value4 = value4                            
+                            value4 = value4
                         };
 
                         seguranca_db.Sessaos.Add(sessao);
@@ -426,7 +426,11 @@ namespace App_Dominio.Security
                                                               join b in seguranca_db.GrupoTransacaos on a.grupoId equals b.grupoId
                                                               join c in seguranca_db.Transacaos on b.transacaoId equals c.transacaoId
                                                               join d in seguranca_db.Grupos on a.grupoId equals d.grupoId
-                                                              where a.usuarioId == usuarioId && a.situacao == "A" && b.situacao == "A" && d.sistemaId == sessaoCorrente.sistemaId
+                                                              where a.usuarioId == usuarioId && 
+                                                                    a.situacao == "A" && 
+                                                                    b.situacao == "A" && 
+                                                                    d.sistemaId == sessaoCorrente.sistemaId && 
+                                                                    d.empresaId == sessaoCorrente.empresaId
                                                               orderby c.transacaoId_pai, c.posicao
                                                               select new TransacaoRepository()
                                                               {
@@ -558,7 +562,7 @@ namespace App_Dominio.Security
                                  where tra.url == url && tra.sistemaId == sessaoCorrente.sistemaId && gru.empresaId == sessaoCorrente.empresaId && usu.usuarioId == sessaoCorrente.usuarioId
                                  select usu).ToList();
 
-                        return x == null;
+                        return x == null || x.Count == 0;
                     }
                     catch (DbEntityValidationException ex)
                     {
