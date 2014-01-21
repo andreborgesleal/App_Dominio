@@ -44,9 +44,16 @@ namespace App_Dominio.Controllers
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
-            GetCreate();
-
-            return View(getModel().CreateRepository());
+            if (ValidateRequest)
+            {
+                GetCreate();
+                return View(getModel().CreateRepository());
+            }
+            else
+            {
+                return null;
+            }
+                
         }
 
         [ValidateInput(false)]

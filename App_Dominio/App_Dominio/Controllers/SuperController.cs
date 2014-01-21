@@ -34,7 +34,7 @@ namespace App_Dominio.Controllers
         public abstract int _sistema_id();
 
         #region Segurança
-        protected bool AccessDenied(string url = null)
+        protected int AccessDenied(string url = null)
         {
             EmpresaSecurity<App_DominioContext> security = new EmpresaSecurity<App_DominioContext>();
             if (url != null)
