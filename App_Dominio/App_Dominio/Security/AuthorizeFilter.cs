@@ -13,11 +13,11 @@ namespace App_Dominio.Security
             {
                 Roles = filterContext.Controller.ControllerContext.RouteData.Values["controller"].ToString() + "/" + filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString();
                 int value = new EmpresaSecurity<App_DominioContext>().AccessDenied(Roles);
-                
+                filterContext.Controller.ViewBag.ValidateRequest = true;
                 if (value > 0)
                 {
-                    filterContext.Controller.ValidateRequest = false;
-                    if (!Roles.ToLower().Contains("modal"))
+                    filterContext.Controller.ViewBag.ValidateRequest = false;
+                    if (!Roles.ToLower().Contains("modal") && !filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString().StartsWith("List"))
                     {
                         if (value == 1)
                             filterContext.HttpContext.Response.Redirect("/Account/Login/");
