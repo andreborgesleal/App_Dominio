@@ -17,7 +17,7 @@ namespace App_Dominio.Security
                 if (value > 0)
                 {
                     filterContext.Controller.ViewBag.ValidateRequest = false;
-                    if (!Roles.ToLower().Contains("modal") && !filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString().StartsWith("List"))
+                    if (Order < 999 && !Roles.ToLower().Contains("modal") && !filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString().StartsWith("List"))
                     {
                         if (value == 1)
                             filterContext.HttpContext.Response.Redirect("/Account/Login/");
