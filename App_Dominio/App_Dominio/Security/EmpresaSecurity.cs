@@ -617,6 +617,36 @@ namespace App_Dominio.Security
 
         #endregion
 
+        #region Retorna um usuário pelo Login
+        public UsuarioRepository getUsuarioByLogin(string login, int empresaId)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                return (from usu in seguranca_db.Usuarios
+                        where usu.login == login && usu.empresaId == empresaId
+                        select new UsuarioRepository()
+                        {
+                            usuarioId = usu.usuarioId,
+                            login = usu.login,
+                            nome = usu.nome,
+                            dt_cadastro = usu.dt_cadastro,
+                            situacao = usu.situacao,
+                            isAdmin = usu.isAdmin
+                        }).FirstOrDefault();
+            }
+        }
+
+        #endregion
+
+        #region Incluir um usuário
+        public UsuarioRepository SetUsuario(UsuarioRepository value)
+        {
+            UsuarioModel model = new UsuarioModel();
+            return model.Insert(value);
+        }
+
+        #endregion
+
         #region Alerta
         public AlertaRepository InsertAlerta(AlertaRepository value)
         {
