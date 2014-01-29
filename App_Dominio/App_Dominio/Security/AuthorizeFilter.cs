@@ -1,10 +1,6 @@
 ﻿using App_Dominio.Entidades;
 using System;
-using System.Collections.Generic;
 using System.Data.Entity.Validation;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web.Mvc;
 
 namespace App_Dominio.Security
@@ -16,16 +12,27 @@ namespace App_Dominio.Security
             try
             {
                 Roles = filterContext.Controller.ControllerContext.RouteData.Values["controller"].ToString() + "/" + filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString();
-                if (new EmpresaSecurity<App_DominioContext>().AccessDenied(Roles))
-                    filterContext.HttpContext.Response.Redirect("/Account/Login/");
+                int value = new EmpresaSecurity<App_DominioContext>().AccessDenied(Roles);
+                filterContext.Controller.ViewBag.ValidateRequest = true;
+                if (value > 0)
+                {
+                    filterContext.Controller.ViewBag.ValidateRequest = false;
+                    if (Order < 999 && !Roles.ToLower().Contains("modal") && !filterContext.Controller.ControllerContext.RouteData.Values["action"].ToString().StartsWith("List"))
+                    {
+                        if (value == 1)
+                            filterContext.HttpContext.Response.Redirect("/Account/Login/");
+                        else if (value == 2)
+                            filterContext.HttpContext.Response.Redirect("/Home/_Error");
+                    }
+                }                    
             }
             catch (DbEntityValidationException ex)
             {
-                filterContext.HttpContext.Response.Redirect("Error");
+                filterContext.HttpContext.Response.Redirect("/Home/_Error");
             }
             catch (Exception ex)
             {
-                filterContext.HttpContext.Response.Redirect("Error");
+                filterContext.HttpContext.Response.Redirect("/Home/_Error");
             }
 
         }

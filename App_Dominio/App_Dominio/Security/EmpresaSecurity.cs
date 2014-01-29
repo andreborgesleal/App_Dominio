@@ -540,8 +540,13 @@ namespace App_Dominio.Security
         #endregion
 
         #region Retorna se o usuário corrente está autorizado a acessar uma dada URL
-        public bool AccessDenied(string url)
+        public int AccessDenied(string url)
         {
+            // valores de retorno:
+            // 0-Acesso autorizado
+            // 1-Redireciona para o login (usuário sem sessão ou sessão expirada)
+            // 2-Exibir mensagem de erro (usuário tem sessão ativa, mas não tem autorização de usar a funcionalidade)
+
             using (seguranca_db = new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
@@ -552,17 +557,19 @@ namespace App_Dominio.Security
                     try
                     {
                         if (_AtualizarSessao(web.Session.SessionID).Code > 0)
-                            return true;
+                            return 1;
 
                         var x = (from gtr in seguranca_db.GrupoTransacaos
                                  join tra in seguranca_db.Transacaos on gtr.Transacao equals tra
                                  join gru in seguranca_db.Grupos on gtr.Grupo equals gru
                                  join ugr in seguranca_db.UsuarioGrupos on gru equals ugr.Grupo
                                  join usu in seguranca_db.Usuarios on ugr.Usuario equals usu
-                                 where tra.url == url && tra.sistemaId == sessaoCorrente.sistemaId && gru.empresaId == sessaoCorrente.empresaId && usu.usuarioId == sessaoCorrente.usuarioId
+                                 where tra.url == url && tra.sistemaId == sessaoCorrente.sistemaId && gru.empresaId == sessaoCorrente.empresaId && ugr.usuarioId == sessaoCorrente.usuarioId && gtr.situacao == "A"
                                  select usu).ToList();
-
-                        return x == null || x.Count == 0;
+                        if (x == null || x.Count == 0)
+                            return 2;
+                        else
+                            return 0;
                     }
                     catch (DbEntityValidationException ex)
                     {
@@ -574,7 +581,7 @@ namespace App_Dominio.Security
                     }
                 }
                 else
-                    return true;
+                    return 1; // redireciona para o login
             }
 
         }
@@ -606,6 +613,36 @@ namespace App_Dominio.Security
                 return q.ToList();
             }
 
+        }
+
+        #endregion
+
+        #region Retorna um usuário pelo Login
+        public UsuarioRepository getUsuarioByLogin(string login, int empresaId)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                return (from usu in seguranca_db.Usuarios
+                        where usu.login == login && usu.empresaId == empresaId
+                        select new UsuarioRepository()
+                        {
+                            usuarioId = usu.usuarioId,
+                            login = usu.login,
+                            nome = usu.nome,
+                            dt_cadastro = usu.dt_cadastro,
+                            situacao = usu.situacao,
+                            isAdmin = usu.isAdmin
+                        }).FirstOrDefault();
+            }
+        }
+
+        #endregion
+
+        #region Incluir um usuário
+        public UsuarioRepository SetUsuario(UsuarioRepository value)
+        {
+            UsuarioModel model = new UsuarioModel();
+            return model.Insert(value);
         }
 
         #endregion

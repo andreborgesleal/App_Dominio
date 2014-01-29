@@ -44,9 +44,16 @@ namespace App_Dominio.Controllers
             //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
             //    return RedirectToAction("Index", "Home");
 
-            GetCreate();
-
-            return View(getModel().CreateRepository());
+            if (ViewBag.ValidateRequest)
+            {
+                GetCreate();
+                return View(getModel().CreateRepository());
+            }
+            else
+            {
+                return null;
+            }
+                
         }
 
         [ValidateInput(false)]
@@ -54,15 +61,17 @@ namespace App_Dominio.Controllers
         [AuthorizeFilter]
         public virtual ActionResult Create(R value, FormCollection collection)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
+            if (ViewBag.ValidateRequest)
+            {
+                R ret = SetCreate(value, getModel(), collection);
 
-            R ret = SetCreate(value, getModel(), collection);
-
-            if (ret.mensagem.Code == 0)
-                return RedirectToAction("Create");
+                if (ret.mensagem.Code == 0)
+                    return RedirectToAction("Create");
+                else
+                    return View(ret);
+            }
             else
-                return View(ret);
+                return null;
         }
 
         public virtual void GetCreate(string breadCrumbText = "Inclusão")
@@ -134,10 +143,10 @@ namespace App_Dominio.Controllers
         [AuthorizeFilter]
         public virtual ActionResult _Edit(R value, string breadCrumbText = null, IDictionary<string, string> text = null)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
-
-            return View(GetEdit(value, breadCrumbText, text));
+            if (ViewBag.ValidateRequest)
+                return View(GetEdit(value, breadCrumbText, text));
+            else
+                return null;
         }
 
         [ValidateInput(false)]
@@ -145,25 +154,27 @@ namespace App_Dominio.Controllers
         [AuthorizeFilter]
         public virtual ActionResult Edit(R value, FormCollection collection)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
-
-            R ret = SetEdit(value, getModel(), collection);
-
-            if (ret.mensagem.Code == 0)
+            if (ViewBag.ValidateRequest)
             {
-                BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
-                if (b.items.Count > 1)
+                R ret = SetEdit(value, getModel(), collection);
+
+                if (ret.mensagem.Code == 0)
                 {
-                    string[] split = b.items[b.items.Count - 2].queryString.Split('&');
-                    string _index = split[0].Replace("?index=", "");
-                    return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
+                    if (b.items.Count > 1)
+                    {
+                        string[] split = b.items[b.items.Count - 2].queryString.Split('&');
+                        string _index = split[0].Replace("?index=", "");
+                        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    }
+                    else
+                        return RedirectToAction("Principal", "Home");
                 }
                 else
-                    return RedirectToAction("Principal", "Home");
+                    return View(ret);
             }
             else
-                return View(ret);
+                return null;
         }
 
         public virtual R GetEdit(R key, string breadCrumbText = null, IDictionary<string, string> text = null)
@@ -237,25 +248,27 @@ namespace App_Dominio.Controllers
         [AuthorizeFilter]
         public virtual ActionResult Delete(R value, FormCollection collection)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
-
-            R ret = SetDelete(value, getModel(), collection);
-
-            if (ret.mensagem.Code == 0)
+            if (ViewBag.ValidateRequest)
             {
-                BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
-                if (b.items.Count > 1)
+                R ret = SetDelete(value, getModel(), collection);
+
+                if (ret.mensagem.Code == 0)
                 {
-                    string[] split = b.items[b.items.Count - 2].queryString.Split('&');
-                    string _index = split[0].Replace("?index=", "");
-                    return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
+                    if (b.items.Count > 1)
+                    {
+                        string[] split = b.items[b.items.Count - 2].queryString.Split('&');
+                        string _index = split[0].Replace("?index=", "");
+                        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    }
+                    else
+                        return RedirectToAction("Principal", "Home");
                 }
                 else
-                    return RedirectToAction("Principal", "Home");
+                    return View(ret);
             }
             else
-                return View(ret);
+                return null;
         }
         public virtual void BeforeDelete(ref R value, ICrudContext<R> model, FormCollection collection) { }
         public virtual R SetDelete(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = null, IDictionary<string, string> text = null, IRootController<R> s = null)

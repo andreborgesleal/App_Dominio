@@ -99,14 +99,36 @@ namespace App_Dominio.Entidades
 
             notacao += "</" + entity.GetType().Name + ">\r\n";
 
-            int _transacaoId = (from t in seguranca_db.Transacaos where t.url.ToLower() == url.ToLower() && t.sistemaId == sessaoCorrente.sistemaId select t.transacaoId).FirstOrDefault();
+            int _sistemaId = 0;
+            int _usuarioId = 0;
+            int _empresaId = 0;
+            string _ip = "";
+            if (sessaoCorrente == null)
+            {
+                _sistemaId = int.Parse(System.Configuration.ConfigurationManager.AppSettings["sistemaId"]);
+                _empresaId = int.Parse(System.Configuration.ConfigurationManager.AppSettings["empresaId"]);
+                _usuarioId = (from usu in seguranca_db.Usuarios 
+                              where usu.empresaId == _empresaId && usu.isAdmin == "S" && usu.situacao == "A"
+                              select usu.usuarioId).FirstOrDefault();
+                _ip = System.Web.HttpContext.Current.Request.UserHostAddress;
+            }
+            else
+            {
+                _sistemaId = sessaoCorrente.sistemaId;
+                _usuarioId = sessaoCorrente.usuarioId;
+                _empresaId = sessaoCorrente.empresaId;
+                _ip = sessaoCorrente.ip;
+            }
+                
+
+            int _transacaoId = (from t in seguranca_db.Transacaos where t.url.ToLower() == url.ToLower() && t.sistemaId == _sistemaId select t.transacaoId).FirstOrDefault();
 
             logAuditoria = new LogAuditoria()
             {
                 dt_log = DateTime.Now,
-                empresaId = sessaoCorrente.empresaId,
-                usuarioId = sessaoCorrente.usuarioId,
-                ip = sessaoCorrente.ip,
+                empresaId = _empresaId,
+                usuarioId = _usuarioId,
+                ip = _ip,
                 transacaoId = _transacaoId,
                 notacao = notacao
             };
@@ -176,7 +198,8 @@ namespace App_Dominio.Entidades
                         System.Web.HttpContext web = System.Web.HttpContext.Current;
                         sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
                         
-                        value.empresaId = sessaoCorrente.empresaId;
+                        if (sessaoCorrente != null)
+                            value.empresaId = sessaoCorrente.empresaId;
 
                         #region validar inclusão
                         value.mensagem = this.Validate(value, Crud.INCLUIR);
@@ -773,7 +796,8 @@ namespace App_Dominio.Entidades
                         System.Web.HttpContext web = System.Web.HttpContext.Current;
                         sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                        value.empresaId = sessaoCorrente.empresaId;
+                        if (sessaoCorrente != null)
+                            value.empresaId = sessaoCorrente.empresaId;
 
                         #region validar inclusão
                         value.mensagem = this.Validate(value, Crud.INCLUIR);
