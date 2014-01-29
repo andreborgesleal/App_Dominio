@@ -281,7 +281,7 @@ namespace App_Dominio.Controllers
                     OnDeleteError(ref value, model, collection);
                     ModelState.AddModelError(ex.Result.Field, ex.Result.Message); // mensagem amigável ao usuário
                     if (ex.Result.MessageType == MsgType.ERROR)
-                        Error(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
+                        Error(ex.Result.Message); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                     else
                         Attention(ex.Result.MessageBase); // Mensagem em inglês com a descrição detalhada do erro e fica no topo da tela
                 }

@@ -22,7 +22,7 @@ namespace App_Dominio.Negocio
                 usuarioId = value.usuarioId,
                 empresaId = value.empresaId,
                 login = value.login,
-                nome = value.nome,
+                nome = value.nome.ToUpper(),
                 dt_cadastro = DateTime.Now,
                 situacao = value.situacao,
                 isAdmin = value.isAdmin,
@@ -126,6 +126,63 @@ namespace App_Dominio.Negocio
                                               && gru1.situacao == "A"
                                               && ugr1.situacao == "A"
                                               && usu1.situacao == "A"
+                                      select usu1).Count()
+                    }).Skip((index ?? 0) * pageSize).Take(pageSize).ToList();
+        }
+
+        public override Repository getRepository(Object id)
+        {
+            return new UsuarioModel().getObject((UsuarioRepository)id);
+        }
+        #endregion
+    }
+
+    public class ListViewUsuarioCad : ListViewRepository<UsuarioRepository, SecurityContext>
+    {
+        #region Métodos da classe ListViewRepository
+        public override IEnumerable<UsuarioRepository> Bind(int? index, int pageSize = 50, params object[] param)
+        {
+            EmpresaSecurity<App_DominioContext> security = new EmpresaSecurity<App_DominioContext>();
+            string _descricao = param != null && param.Count() > 0 && param[0] != null ? param[0].ToString() : null;
+
+            sessaoCorrente = security.getSessaoCorrente();
+
+            int _empresaId = sessaoCorrente.empresaId;
+
+            return (from usu in db.Usuarios
+                    join ugr in db.UsuarioGrupos on usu equals ugr.Usuario into UGR
+                    from ugr in UGR.DefaultIfEmpty()
+                    join gru in db.Grupos on ugr.Grupo equals gru into GRU
+                    from gru in GRU.DefaultIfEmpty()
+                    where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu.nome.StartsWith(_descricao.Trim()))
+                            && usu.empresaId == _empresaId
+                            && gru.empresaId == _empresaId
+                            && gru.situacao == "A"
+                            && ugr.situacao == "A"
+                    orderby usu.nome
+                    select new UsuarioRepository
+                    {
+                        usuarioId = usu.usuarioId,
+                        nome = usu.nome,
+                        login = usu.login,
+                        empresaId = usu.empresaId,
+                        dt_cadastro = usu.dt_cadastro,
+                        situacao = usu.situacao,
+                        isAdmin = usu.isAdmin,
+                        nome_grupo = gru.descricao,
+                        keyword = usu.keyword,
+                        dt_keyword = usu.dt_keyword,
+                        PageSize = pageSize,
+                        TotalCount = (from usu1 in db.Usuarios
+                                      join ugr1 in db.UsuarioGrupos on usu1 equals ugr1.Usuario into UGR1
+                                      from ugr1 in UGR1.DefaultIfEmpty()
+                                      join gru1 in db.Grupos on ugr1.Grupo equals gru1 into GRU1
+                                      from gru1 in GRU1.DefaultIfEmpty()
+                                      where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu1.nome.StartsWith(_descricao.Trim()))
+                                              && usu1.empresaId == _empresaId
+                                              && gru1.empresaId == _empresaId
+                                              && gru1.situacao == "A"
+                                              && ugr1.situacao == "A"
                                       select usu1).Count()
                     }).Skip((index ?? 0) * pageSize).Take(pageSize).ToList();
         }
