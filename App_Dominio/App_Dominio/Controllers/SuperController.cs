@@ -139,8 +139,6 @@ namespace App_Dominio.Controllers
             if (ViewBag.ValidateRequest)
             {
                 IPagedList pagedList = model.getPagedList(index, report, this.ControllerContext.RouteData.Values["controller"].ToString(), action, pageSize.Value, param);
-                if (pagedList.TotalCount == 0)
-                    Attention("Não há registros a serem exibidos");
                 UpdateBreadCrumb(this.ControllerContext.RouteData.Values["controller"].ToString(), action);
                 return View(pagedList);
             }
@@ -154,8 +152,6 @@ namespace App_Dominio.Controllers
             if (ViewBag.ValidateRequest)
             {
                 IPagedList pagedList = model.getPagedList(index, report, this.ControllerContext.RouteData.Values["controller"].ToString(), action, pageSize.Value, param);
-                if (pagedList.TotalCount == 0)
-                    Attention("Não há registros a serem exibidos");
                 miniCrud.Create(pagedList.Filtros);
                 UpdateBreadCrumb(this.ControllerContext.RouteData.Values["controller"].ToString(), action);
                 return View(pagedList);
@@ -344,9 +340,6 @@ namespace App_Dominio.Controllers
             {
                 IPagedList pagedList = model.getPagedList(index, pageSize.Value, param);
 
-                if (pagedList.TotalCount == 0)
-                    Attention("Não há registros a serem exibidos");
-
                 ViewBag.Header = header;
 
                 if (param != null && param.Count() > 0)
@@ -365,9 +358,6 @@ namespace App_Dominio.Controllers
             {
                 IPagedList pagedList = model.getPagedList(index, report, controller, action, pageSize.Value, param);
 
-                if (pagedList.TotalCount == 0)
-                    Attention("Não há registros a serem exibidos");
-
                 ViewBag.Header = header;
 
                 if (param != null && param.Count() > 0)
@@ -385,9 +375,6 @@ namespace App_Dominio.Controllers
             if (ViewBag.ValidateRequest)
             {
                 IPagedList pagedList = model.getPagedList(index, pageSize.Value, param);
-
-                if (pagedList.TotalCount == 0)
-                    Attention("Não há registros a serem exibidos");
 
                 ViewBag.Header = header;
 

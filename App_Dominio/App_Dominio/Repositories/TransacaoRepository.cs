@@ -1,4 +1,5 @@
-﻿using System;
+﻿using App_Dominio.Component;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading.Tasks;
 namespace App_Dominio.Repositories
 {
 
-    public class TransacaoRepository
+    public class TransacaoRepository : Repository
     {
         public int transacaoId { get; set; }
         public int sistemaId { get; set; }

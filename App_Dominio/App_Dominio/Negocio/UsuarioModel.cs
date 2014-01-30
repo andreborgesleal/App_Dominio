@@ -194,4 +194,48 @@ namespace App_Dominio.Negocio
         #endregion
     }
 
+    public class ListViewUsuariosAll : ListViewRepository<UsuarioRepository, SecurityContext>
+    {
+        #region Métodos da classe ListViewRepository
+        public override IEnumerable<UsuarioRepository> Bind(int? index, int pageSize = 50, params object[] param)
+        {
+            EmpresaSecurity<App_DominioContext> security = new EmpresaSecurity<App_DominioContext>();
+            string _descricao = param != null && param.Count() > 0 && param[0] != null ? param[0].ToString() : null;
+
+            sessaoCorrente = security.getSessaoCorrente();
+
+            int _empresaId = sessaoCorrente.empresaId;
+
+            return (from usu in db.Usuarios
+                    where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu.nome.StartsWith(_descricao.Trim()) || usu.login == _descricao.Trim())
+                            && usu.empresaId == _empresaId
+                            && usu.situacao == "A"
+                    orderby usu.nome
+                    select new UsuarioRepository
+                    {
+                        usuarioId = usu.usuarioId,
+                        nome = usu.nome,
+                        login = usu.login,
+                        empresaId = usu.empresaId,
+                        dt_cadastro = usu.dt_cadastro,
+                        situacao = usu.situacao,
+                        isAdmin = usu.isAdmin,
+                        keyword = usu.keyword,
+                        dt_keyword = usu.dt_keyword,
+                        PageSize = pageSize,
+                        TotalCount = (from usu1 in db.Usuarios
+                                      where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu1.nome.StartsWith(_descricao.Trim()) || usu1.login == _descricao.Trim())
+                                              && usu1.empresaId == _empresaId
+                                              && usu1.situacao == "A"
+                                      select usu1).Count()
+                    }).Skip((index ?? 0) * pageSize).Take(pageSize).ToList();
+        }
+
+        public override Repository getRepository(Object id)
+        {
+            return new UsuarioModel().getObject((UsuarioRepository)id);
+        }
+        #endregion
+    }
+
 }
