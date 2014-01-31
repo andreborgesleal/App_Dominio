@@ -9,7 +9,7 @@ namespace App_Dominio.Repositories
     public class LogAuditoriaRepository : Repository
     {
         [DisplayName("ID Log")]
-        public int logId { get; set; }
+        public decimal logId { get; set; }
         [DisplayName("ID Transação")]
         public int transacaoId { get; set; }
         [DisplayName("Funcionalidade")]
