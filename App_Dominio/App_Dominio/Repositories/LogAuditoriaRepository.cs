@@ -1,8 +1,10 @@
 ﻿using App_Dominio.Component;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Web.Mvc;
 
 namespace App_Dominio.Repositories
 {
@@ -32,5 +34,7 @@ namespace App_Dominio.Repositories
         public string ip { get; set; }
         [DisplayName("Notação")]
         public string notacao { get; set; }
+        [DisplayName("Atributos")]
+        public IEnumerable<SelectListItem> Notacaos { get; set; }
     }
 }

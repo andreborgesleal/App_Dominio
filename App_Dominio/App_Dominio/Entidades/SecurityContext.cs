@@ -20,6 +20,7 @@ namespace App_Dominio.Entidades
         public DbSet<Sessao> Sessaos { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Empresa> Empresas { get; set; }
+        public DbSet<Sistema> Sistemas { get; set; }
         public DbSet<Alerta> Alertas { get; set; }
         public DbSet<Grupo> Grupos { get; set; }
         public DbSet<Transacao> Transacaos { get; set; }

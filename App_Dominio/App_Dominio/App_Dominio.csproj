@@ -120,6 +120,9 @@
     <Compile Include="Negocio\AlertaModel.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Negocio\AlterarSenhaModel.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Negocio\FiltroModel.cs" />
     <Compile Include="Negocio\UsuarioModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -13,6 +13,8 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web;
+using System.Web.Mvc;
+using System.Xml.Linq;
 
 namespace App_Dominio.Security
 {
@@ -643,6 +645,68 @@ namespace App_Dominio.Security
         {
             UsuarioModel model = new UsuarioModel();
             return model.Insert(value);
+        }
+
+        #endregion
+
+        #region Retorna o Log de Auditoria a partid do ID
+        public LogAuditoriaRepository getLogAuditoriaById(int logId)
+        {
+            using (seguranca_db = new SecurityContext())
+            {
+                int empresaId = _getSessaoCorrente().empresaId;
+
+                LogAuditoriaRepository log = (from l in seguranca_db.LogAuditorias
+                                              join t in seguranca_db.Transacaos on l.transacaoId equals t.transacaoId
+                                              join u in seguranca_db.Usuarios on l.usuarioId equals u.usuarioId
+                                              where l.logId == logId && l.empresaId == empresaId
+                                              select new LogAuditoriaRepository()
+                                              {
+                                                  logId = l.logId,
+                                                  transacaoId = l.transacaoId,
+                                                  nomeCurto = t.nomeCurto,
+                                                  nome_funcionalidade = t.nome,
+                                                  empresaId = l.empresaId,
+                                                  usuarioId = l.usuarioId,
+                                                  login = u.login,
+                                                  nome_usuario = u.nome,
+                                                  dt_log = l.dt_log,
+                                                  ip = l.ip,
+                                                  notacao = l.notacao
+                                              }).FirstOrDefault();
+
+                IList<SelectListItem> list = new List<SelectListItem>();
+
+                XDocument documento = XDocument.Parse(log.notacao);
+
+                string root = documento.Root.Name.LocalName;
+
+                SelectListItem nomeCurto = new SelectListItem() { Text = "Funcionalidade", Value = log.nomeCurto };
+                list.Add(nomeCurto);
+
+                SelectListItem funcionalidade = new SelectListItem() { Text = "Descrição", Value = log.nome_funcionalidade };
+                list.Add(funcionalidade);
+
+                SelectListItem entity = new SelectListItem() { Text = "Entidade", Value = root };
+                list.Add(entity);
+
+                IEnumerable<XElement> element = from c in documento.Descendants(root) select c;
+
+                foreach (XElement e in element.Elements())
+                {
+                    SelectListItem item = new SelectListItem()
+                    {
+                        Text = e.Attribute("name").Value,
+                        Value = e.Attribute("value").Value
+                    };
+
+                    list.Add(item);
+                }
+
+                log.Notacaos = list.AsEnumerable().ToList();
+
+                return log;
+            }
         }
 
         #endregion

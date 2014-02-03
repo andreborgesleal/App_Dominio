@@ -66,7 +66,7 @@ namespace App_Dominio.Negocio
                 value.mensagem.MessageType = MsgType.WARNING;
                 return value.mensagem;
             }
-            else if ((value.usuarioId == null || value.usuarioId == 0) && operation != Crud.INCLUIR)
+            else if (value.usuarioId == 0 && operation != Crud.INCLUIR)
             {
                 value.mensagem.Code = 5;
                 value.mensagem.Message = MensagemPadrao.Message(5, "ID do usuário").ToString();
@@ -150,15 +150,8 @@ namespace App_Dominio.Negocio
             int _empresaId = sessaoCorrente.empresaId;
 
             return (from usu in db.Usuarios
-                    join ugr in db.UsuarioGrupos on usu equals ugr.Usuario into UGR
-                    from ugr in UGR.DefaultIfEmpty()
-                    join gru in db.Grupos on ugr.Grupo equals gru into GRU
-                    from gru in GRU.DefaultIfEmpty()
-                    where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu.nome.StartsWith(_descricao.Trim()))
+                    where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu.nome.StartsWith(_descricao.Trim()) || usu.login == _descricao.Trim())
                             && usu.empresaId == _empresaId
-                            && gru.empresaId == _empresaId
-                            && gru.situacao == "A"
-                            && ugr.situacao == "A"
                     orderby usu.nome
                     select new UsuarioRepository
                     {
@@ -169,20 +162,13 @@ namespace App_Dominio.Negocio
                         dt_cadastro = usu.dt_cadastro,
                         situacao = usu.situacao,
                         isAdmin = usu.isAdmin,
-                        nome_grupo = gru.descricao,
                         keyword = usu.keyword,
                         dt_keyword = usu.dt_keyword,
                         PageSize = pageSize,
                         TotalCount = (from usu1 in db.Usuarios
-                                      join ugr1 in db.UsuarioGrupos on usu1 equals ugr1.Usuario into UGR1
-                                      from ugr1 in UGR1.DefaultIfEmpty()
-                                      join gru1 in db.Grupos on ugr1.Grupo equals gru1 into GRU1
-                                      from gru1 in GRU1.DefaultIfEmpty()
-                                      where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu1.nome.StartsWith(_descricao.Trim()))
+                                      where (_descricao == null || String.IsNullOrEmpty(_descricao) || usu1.nome.StartsWith(_descricao.Trim()) || usu1.login == _descricao.Trim())
                                               && usu1.empresaId == _empresaId
-                                              && gru1.empresaId == _empresaId
-                                              && gru1.situacao == "A"
-                                              && ugr1.situacao == "A"
+                                      orderby usu1.nome
                                       select usu1).Count()
                     }).Skip((index ?? 0) * pageSize).Take(pageSize).ToList();
         }

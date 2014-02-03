@@ -76,7 +76,7 @@ namespace App_Dominio.Entidades
             string displayName = "";
             string notacao = "<?xml version=\"1.0\"?>\r\n";
             notacao += "<" + entity.GetType().Name + ">\r\n";
-            notacao += "<Ação>" + operacao + "</Ação>\r\n";
+            notacao += "<Context name=\"Operação\" value=\"" + operacao + "\"></Context>\r\n";
 
             for (int i = 0; i <= atributes.Count() - 1; i++)
             {
@@ -88,14 +88,14 @@ namespace App_Dominio.Entidades
                 if (displayName.ToLower() != "xml")
                 {
                     if (atributes[i].GetValue(entity) != null)
-                        notacao += "<" + displayName + ">" + atributes[i].GetValue(entity).ToString() + "</" + displayName + ">\r\n";
+                        notacao += "<Context name=\"" + displayName + "\" value=\"" + atributes[i].GetValue(entity).ToString().Replace("\"","'").Replace("<","[").Replace(">","]") + "\"></Context>\r\n";
                     else
-                        notacao += "<" + displayName + "></" + displayName + ">\r\n";                
+                        notacao += "<Context name=\"" + displayName + "\" value=\"\"></Context>\r\n";                
                 }
             }
 
             if (tag != null && tag != "")
-                notacao += "<tag>" + tag + "</tag>\r\n";
+                notacao += "<Context name=\"tag\" value=\"" + tag + "\"></Context>\r\n";
 
             notacao += "</" + entity.GetType().Name + ">\r\n";
 

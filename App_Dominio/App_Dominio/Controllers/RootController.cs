@@ -144,7 +144,13 @@ namespace App_Dominio.Controllers
         public virtual ActionResult _Edit(R value, string breadCrumbText = null, IDictionary<string, string> text = null)
         {
             if (ViewBag.ValidateRequest)
-                return View(GetEdit(value, breadCrumbText, text));
+            {
+                R repository = GetEdit(value, breadCrumbText, text);
+                if (repository.mensagem.Code == 202)
+                    return RedirectToAction("../Home/_Error");
+
+                return View(repository);
+            }                
             else
                 return null;
         }

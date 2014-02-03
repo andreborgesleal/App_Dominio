@@ -33,12 +33,13 @@ namespace App_Dominio.Repositories
         [Required]
         [DisplayName("Administrador (S/N")]
         public string isAdmin { get; set; }
-        
+
         [DataType(DataType.Password)]
         public string senha { get; set; }
 
         [DataType(DataType.Password)]
         [DisplayName("Confirmar Senha")]
+        [Compare("senha", ErrorMessage = "As senhas não conferem.")]
         public string confirmacaoSenha { get; set; }
 
         public string keyword { get; set; }
@@ -46,5 +47,14 @@ namespace App_Dominio.Repositories
         public Nullable<DateTime> dt_keyword { get; set; }
 
         public string nome_grupo { get; set; }
+
+        public string nome_sistema { get; set; }
+    }
+
+    public class AlterarSenhaRepository : UsuarioRepository
+    {
+        [DisplayName("Senha Atual")]
+        [Required(ErrorMessage="Senha atual deve ser informada")]
+        public string senhaAtual { get; set; }
     }
 }
