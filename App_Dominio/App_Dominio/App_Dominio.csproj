@@ -68,6 +68,7 @@
     <Compile Include="Contratos\IReportRepository.cs" />
     <Compile Include="Contratos\ISecurity.cs" />
     <Compile Include="Contratos\IValidate.cs" />
+    <Compile Include="Controllers\MasterController.cs" />
     <Compile Include="Controllers\ProcessController.cs">
       <SubType>Code</SubType>
     </Compile>

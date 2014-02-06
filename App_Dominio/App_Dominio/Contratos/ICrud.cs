@@ -1,4 +1,5 @@
 ﻿using App_Dominio.Component;
+using App_Dominio.Enumeracoes;
 using System;
 using System.Collections.Generic;
 
@@ -33,7 +34,7 @@ namespace App_Dominio.Contratos
 
     public interface IProcessContext<R> : ICrudContext<R> where R : Repository
     {
-        R SaveAll(R value);
+        R SaveAll(R value, Crud operation);
     }
 
 }

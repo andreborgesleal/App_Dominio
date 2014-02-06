@@ -28,7 +28,7 @@ namespace App_Dominio.Controllers
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
-                    value = ((IProcessContext<R>)model).SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value, Crud.INCLUIR);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
@@ -94,7 +94,7 @@ namespace App_Dominio.Controllers
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
-                    value = ((IProcessContext<R>)model).SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value, Crud.ALTERAR);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
@@ -148,7 +148,7 @@ namespace App_Dominio.Controllers
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
-                    value = ((IProcessContext<R>)model).SaveAll(value);
+                    value = ((IProcessContext<R>)model).SaveAll(value, Crud.EXCLUIR);
                     if (value.mensagem.Code > 0)
                         throw new App_DominioException(value.mensagem);
 
@@ -201,7 +201,7 @@ namespace App_Dominio.Controllers
 
                 value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
 
-                value = ((IProcessContext<R>)model).SaveAll(value);
+                value = ((IProcessContext<R>)model).SaveAll(value, Crud.INCLUIR);
                 if (value.mensagem.Code > 0)
                     throw new App_DominioException(value.mensagem);
             }

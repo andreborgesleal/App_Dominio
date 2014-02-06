@@ -782,10 +782,10 @@ namespace App_Dominio.Entidades
         where R : Repository
         where D : DbContext
     {
-        public abstract E ExecProcess(R value);
+        public abstract E ExecProcess(R value, Crud operation = Crud.INCLUIR);
 
         #region Save All
-        public R SaveAll(R value)
+        public R SaveAll(R value, Crud operation)
         {
             using (db = getContextInstance())
             {
@@ -799,15 +799,15 @@ namespace App_Dominio.Entidades
                         if (sessaoCorrente != null)
                             value.empresaId = sessaoCorrente.empresaId;
 
-                        #region validar inclusão
-                        value.mensagem = this.Validate(value, Crud.INCLUIR);
+                        #region validar processamento
+                        value.mensagem = this.Validate(value, operation);
                         #endregion
 
-                        #region insere os registros
+                        #region processar os registros
                         if (value.mensagem.Code == 0)
                         {
                             string _url = value.uri;
-                            E entity = ExecProcess(value);
+                            E entity = ExecProcess(value, operation);
                             db.SaveChanges();
                             value = MapToRepository(entity);
                             value.uri = _url;
