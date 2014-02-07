@@ -814,7 +814,13 @@ namespace App_Dominio.Entidades
 
                             // só deverá ser implementado se não for executar operações na conexão atual.
                             // caso contrário deverá ser feito dentro do método ExecProcess
-                            value.mensagem = AfterInsert(value);
+                            if (operation == Crud.INCLUIR)
+                                value.mensagem = AfterInsert(value);
+                            else if (operation == Crud.ALTERAR)
+                                value.mensagem = AfterUpdate(value);
+                            else
+                                value.mensagem = AfterDelete(value);
+
                             if (value.mensagem.Code > 0)
                                 throw new DbUpdateException(value.mensagem.MessageBase);
 
@@ -873,6 +879,14 @@ namespace App_Dominio.Entidades
 
         public virtual Validate AfterInsert(R value) 
         { 
+            return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
+        }
+        public virtual Validate AfterUpdate(R value)
+        {
+            return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
+        }
+        public virtual Validate AfterDelete(R value)
+        {
             return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
         }   
     }
