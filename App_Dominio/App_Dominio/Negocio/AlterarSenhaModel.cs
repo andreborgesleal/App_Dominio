@@ -34,7 +34,7 @@ namespace App_Dominio.Negocio
             return value.mensagem;
         }
 
-        public override UsuarioRepository CreateRepository()
+        public override UsuarioRepository CreateRepository(System.Web.HttpRequestBase Request)
         {
             return new AlterarSenhaRepository();
         }

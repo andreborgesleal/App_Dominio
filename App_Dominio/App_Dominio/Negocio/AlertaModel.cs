@@ -57,7 +57,7 @@ namespace App_Dominio.Negocio
             return value.mensagem;
         }
 
-        public override AlertaRepository CreateRepository()
+        public override AlertaRepository CreateRepository(System.Web.HttpRequestBase Request)
         {
             return new AlertaRepository();
         }

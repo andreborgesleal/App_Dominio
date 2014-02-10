@@ -47,13 +47,10 @@ namespace App_Dominio.Controllers
             if (ViewBag.ValidateRequest)
             {
                 GetCreate();
-                return View(getModel().CreateRepository());
+                return View(getModel().CreateRepository(Request));
             }
             else
-            {
-                return null;
-            }
-                
+                return null;               
         }
 
         [ValidateInput(false)]
