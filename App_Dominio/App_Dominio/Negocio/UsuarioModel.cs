@@ -17,6 +17,9 @@ namespace App_Dominio.Negocio
         {
             EmpresaSecurity<SecurityContext> security = new EmpresaSecurity<SecurityContext>();
 
+            if (value.senha.Trim().Length <= 20)
+                value.senha = security.Criptografar(value.senha);
+
             return new Usuario()
             {
                 usuarioId = value.usuarioId,
@@ -26,7 +29,7 @@ namespace App_Dominio.Negocio
                 dt_cadastro = DateTime.Now,
                 situacao = value.situacao,
                 isAdmin = value.isAdmin,
-                senha = security.Criptografar(value.senha),
+                senha = value.senha,
                 keyword = value.keyword,
                 dt_keyword = value.dt_keyword
             };
@@ -44,6 +47,7 @@ namespace App_Dominio.Negocio
                 situacao = entity.situacao,
                 isAdmin = entity.isAdmin,
                 keyword = entity.keyword,
+                senha = entity.senha,
                 dt_keyword = entity.dt_keyword,
                 mensagem = new Validate() { Code = 0, Message = "Registro incluído com sucesso", MessageBase = "Registro incluído com sucesso", MessageType = MsgType.SUCCESS }
             };
@@ -71,6 +75,14 @@ namespace App_Dominio.Negocio
                 value.mensagem.Code = 5;
                 value.mensagem.Message = MensagemPadrao.Message(5, "ID do usuário").ToString();
                 value.mensagem.MessageBase = "Campo ID do Usuário deve ser informado";
+                value.mensagem.MessageType = MsgType.WARNING;
+                return value.mensagem;
+            }
+            else if (value.senha == null)
+            {
+                value.mensagem.Code = 5;
+                value.mensagem.Message = MensagemPadrao.Message(5, "Senha").ToString();
+                value.mensagem.MessageBase = "Campo Senha deve ser informado";
                 value.mensagem.MessageType = MsgType.WARNING;
                 return value.mensagem;
             }

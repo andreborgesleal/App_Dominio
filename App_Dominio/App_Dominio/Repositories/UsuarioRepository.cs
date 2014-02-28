@@ -35,6 +35,7 @@ namespace App_Dominio.Repositories
         public string isAdmin { get; set; }
 
         [DataType(DataType.Password)]
+        [StringLength(20, ErrorMessage="A senha deve possuir no máximo 20 caracteres")]
         public string senha { get; set; }
 
         [DataType(DataType.Password)]
@@ -49,6 +50,7 @@ namespace App_Dominio.Repositories
         public string nome_grupo { get; set; }
 
         public string nome_sistema { get; set; }
+
     }
 
     public class AlterarSenhaRepository : UsuarioRepository
