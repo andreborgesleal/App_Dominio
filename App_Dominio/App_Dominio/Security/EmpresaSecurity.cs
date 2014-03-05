@@ -628,12 +628,16 @@ namespace App_Dominio.Security
                         where usu.login == login && usu.empresaId == empresaId
                         select new UsuarioRepository()
                         {
+                            empresaId = usu.empresaId,
                             usuarioId = usu.usuarioId,
                             login = usu.login,
                             nome = usu.nome,
                             dt_cadastro = usu.dt_cadastro,
                             situacao = usu.situacao,
-                            isAdmin = usu.isAdmin
+                            isAdmin = usu.isAdmin,
+                            senha = usu.senha,
+                            keyword = usu.keyword,
+                            dt_keyword = usu.dt_keyword
                         }).FirstOrDefault();
             }
         }

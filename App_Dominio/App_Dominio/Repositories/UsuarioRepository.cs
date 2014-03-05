@@ -42,7 +42,7 @@ namespace App_Dominio.Repositories
         [Compare("senha", ErrorMessage = "As senhas não conferem.")]
         public string confirmacaoSenha { get; set; }
 
-        public string keyword { get; set; }
+        public virtual string keyword { get; set; }
 
         public Nullable<DateTime> dt_keyword { get; set; }
 
@@ -56,5 +56,18 @@ namespace App_Dominio.Repositories
         [DisplayName("Senha Atual")]
         [Required(ErrorMessage="Senha atual deve ser informada")]
         public string senhaAtual { get; set; }
+    }
+
+    public class EsqueciMinhaSenhaRepository : Repository
+    {
+        [Required]
+        [DataType(DataType.EmailAddress, ErrorMessage = "Informe um e-mail válido")]
+        [EmailAddress]
+        [Display(Name = "Login")]
+        public string login { get; set; }
+
+        [Required]
+        [DisplayName("Código de validação")]
+        public string keyword { get; set; }
     }
 }
