@@ -11,7 +11,7 @@ namespace App_Dominio.Controllers
     public abstract class ReportController<R> : SuperController where R : Repository
     {
         #region Exportar para PDF (Report Server)
-        public FileResult _PDF(string export, string fileName, ReportRepository<R, App_DominioContext> report, ReportParameter[] p,
+        public FileResult _PDF(string export, string fileName, IListReportRepository<R> report, ReportParameter[] p,
                                 string PageWidth = "21cm", string PageHeight = "29,7cm", params object[] param)
         {
             p[0] = new ReportParameter("empresa", new EmpresaSecurity<App_DominioContext>().getEmpresa().nome, false);
