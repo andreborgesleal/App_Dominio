@@ -17,7 +17,7 @@ namespace App_Dominio.Controllers
             p[0] = new ReportParameter("empresa", new EmpresaSecurity<App_DominioContext>().getEmpresa().nome, false);
 
             LocalReport relatorio = new LocalReport();
-            relatorio.ReportPath = Server.MapPath("~/App_Data/rdlc/" + fileName + ".rdlc");
+            relatorio.ReportPath = Server.MapPath("~/Views/rdlc/" + fileName + ".rdlc");
             IEnumerable<IReportRepository<R>> r = (IEnumerable<IReportRepository<R>>)report.ListReportRepository(param);
             relatorio.DataSources.Add(new ReportDataSource("DataSet1", r));
 
