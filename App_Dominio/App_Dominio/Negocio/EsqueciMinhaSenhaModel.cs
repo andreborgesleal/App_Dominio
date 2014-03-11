@@ -195,7 +195,7 @@ namespace App_Dominio.Negocio
         public override void Prepare(ref UsuarioRepository value)
         {
             value.keyword = new Random().Next(0, 99999999).ToString();
-            value.dt_keyword = DateTime.Today.AddHours(2);
+            value.dt_keyword = DateTime.Now.AddHours(2);
 
             newKeyword = value.keyword;
         }
