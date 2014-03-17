@@ -13,24 +13,24 @@ namespace App_Dominio.Repositories
         [DisplayName("ID")]
         public int usuarioId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage="Informe o login de acesso")]
         [DataType(DataType.EmailAddress, ErrorMessage = "Informe um e-mail válido")]
         [EmailAddress]
         [Display(Name = "Login")]
         public string login { get; set; }
 
         [DisplayName("Nome")]
-        [Required]
+        [Required(ErrorMessage = "Informe o nome do usuário")]
         [StringLength(40, ErrorMessage="O nome do usuário deve ter no máximo 40 caracteres" )]
         public string nome { get; set; }
 
         public DateTime dt_cadastro { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Informe a Situação do cadastro")]
         [DisplayName("Situação")]
         public string situacao { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Informe se o usuário é Administrador ou não")]
         [DisplayName("Administrador (S/N")]
         public string isAdmin { get; set; }
 
