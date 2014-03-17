@@ -37,5 +37,14 @@ namespace App_Dominio.Contratos
         R SaveAll(R value, Crud operation);
     }
 
+    public interface IExecContext<R> where R : Repository
+    {
+        R Run(R value, Crud operation);
+        Validate AfterRun(R value, Crud operation);
+        R CreateRepository(System.Web.HttpRequestBase Request = null);
+        Validate Validate(R value, App_Dominio.Enumeracoes.Crud operation);
+    }
+
+
 }
 

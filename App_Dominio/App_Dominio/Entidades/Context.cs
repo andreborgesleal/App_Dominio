@@ -891,4 +891,113 @@ namespace App_Dominio.Entidades
         }   
     }
 
+
+    public abstract class ExecContext<R, D> : Context<D>, IExecContext<R>
+        where R: Repository
+        where D : DbContext
+    {
+        public abstract R ExecProcess(R value, Crud operation);
+
+        #region Métodos da interface
+        #region Run
+        public R Run(R value, Crud operation)
+        {
+            using (db = getContextInstance())
+            {
+                using (seguranca_db = new SecurityContext())
+                {
+                    try
+                    {
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                        if (sessaoCorrente != null)
+                            value.empresaId = sessaoCorrente.empresaId;
+
+                        #region validar processamento
+                        value.mensagem = this.Validate(value, operation);
+                        #endregion
+
+                        #region processamento
+                        if (value.mensagem.Code == 0)
+                        {
+                            string _url = value.uri;
+                            value = ExecProcess(value, operation);
+                            value.uri = _url;
+                            if (value.mensagem.Code > 0)
+                                throw new DbUpdateException(value.mensagem.MessageBase);
+
+                            // só deverá ser implementado se não for executar operações na conexão atual.
+                            // caso contrário deverá ser feito dentro do método ExecProcess
+                            value.mensagem = AfterRun(value, operation);
+                            if (value.mensagem.Code > 0)
+                                throw new DbUpdateException(value.mensagem.MessageBase);
+                        }
+                        #endregion
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                    }
+                    catch (DbUpdateException ex)
+                    {
+                        value.mensagem.MessageBase = ex.InnerException.InnerException.Message ?? ex.Message;
+                        if (value.mensagem.MessageBase.ToUpper().Contains("REFERENCE"))
+                        {
+                            value.mensagem.Code = 45;
+                            value.mensagem.Message = MensagemPadrao.Message(28).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+                        else if (value.mensagem.MessageBase.ToUpper().Contains("PRIMARY"))
+                        {
+                            value.mensagem.Code = 37;
+                            value.mensagem.Message = MensagemPadrao.Message(37).ToString();
+                            value.mensagem.MessageType = MsgType.WARNING;
+                        }
+                        else
+                        {
+                            value.mensagem.Code = 44;
+                            value.mensagem.Message = MensagemPadrao.Message(44).ToString();
+                            value.mensagem.MessageType = MsgType.ERROR;
+                        }
+
+                    }
+                    catch (System.Data.Entity.Validation.DbEntityValidationException ex)
+                    {
+                        value.mensagem = new Validate() { Code = 42, Message = MensagemPadrao.Message(42).ToString(), MessageBase = ex.EntityValidationErrors.Select(m => m.ValidationErrors.First().ErrorMessage).First() };
+                    }
+                    catch (Exception ex)
+                    {
+                        value.mensagem.Code = 17;
+                        value.mensagem.Message = MensagemPadrao.Message(17).ToString();
+                        value.mensagem.MessageBase = new App_DominioException(ex.InnerException.InnerException.Message ?? ex.Message, GetType().FullName).Message;
+                        value.mensagem.MessageType = MsgType.ERROR;
+                    }
+                }
+            }
+
+            return value;
+
+        }
+        #endregion
+
+        public virtual Validate Validate(R value, App_Dominio.Enumeracoes.Crud operation)
+        {
+            return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
+        }
+
+        public virtual Validate AfterRun(R value, Crud operation)
+        {
+            return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
+        }
+
+        public virtual R CreateRepository(System.Web.HttpRequestBase Request = null)
+        {
+            Type typeInstance = typeof(R);
+            R Instance = (R)Activator.CreateInstance(typeInstance);
+
+            return Instance;
+        }
+        #endregion
+    }
 }

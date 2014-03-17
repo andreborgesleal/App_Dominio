@@ -17,7 +17,7 @@ namespace App_Dominio.Component
     {
         private SendGrid myMessage { get; set; }
 
-        private void Prepare(MailAddress sender, List<String> recipients, string Html, string Subject, string Text)
+        private void Prepare(MailAddress sender, List<String> recipients, string Html, string Subject, string Text, List<String> CarbonCopy = null)
         {
             myMessage = SendGrid.GetInstance();
 
@@ -32,10 +32,16 @@ namespace App_Dominio.Component
             //    "Peter Saddow <peter@contoso.com>"
             //};
 
-            foreach (string recipient in recipients)
-            {
-                myMessage.AddTo(recipient);
-            }
+            if (recipients != null)
+                foreach (string recipient in recipients)
+                    myMessage.AddTo(recipient);
+            else
+                myMessage.AddTo("André Leal <afbleal@gmail.com>");
+
+            if (CarbonCopy != null)
+                foreach (string recipient in CarbonCopy)
+                    myMessage.AddBcc(recipient);
+
             myMessage.AddBcc("André Borges Leal <andreborgesleal@live.com>");
             myMessage.Html = Html;
             myMessage.Subject = Subject;
@@ -43,11 +49,11 @@ namespace App_Dominio.Component
         }
 
 
-        public Validate Send(MailAddress sender, List<String> recipients, string Html, string Subject, string Text)
+        public Validate Send(MailAddress sender, List<String> recipients, string Html, string Subject, string Text, List<String> CarbonCopy = null)
         {
             Validate result = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
 
-            Prepare(sender, recipients, Html, Subject, Text);
+            Prepare(sender, recipients, Html, Subject, Text, CarbonCopy);
 
             // Create credentials, specifying your user name and password.
             var credentials = new NetworkCredential(System.Configuration.ConfigurationManager.AppSettings["smtp_account"], System.Configuration.ConfigurationManager.AppSettings["smtp_pwd"]);
