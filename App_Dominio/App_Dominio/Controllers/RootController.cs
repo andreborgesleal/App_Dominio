@@ -167,8 +167,18 @@ namespace App_Dominio.Controllers
                     if (b.items.Count > 1)
                     {
                         string[] split = b.items[b.items.Count - 2].queryString.Split('&');
-                        string _index = split[0].Replace("?index=", "");
-                        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                        //string _index = split[0].Replace("?index=", "");
+                        System.Web.Routing.RouteValueDictionary routValues = new System.Web.Routing.RouteValueDictionary();
+
+                        for (int z = 0; z <= split.Count() - 1; z++)
+                        {
+                            string[] p = split[z].Replace("?", "").Split('=');
+                            if (p.Count() == 2)
+                                routValues.Add(p[0], p[1]);
+                        }
+                        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, routValues);
+
+                        //return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
                     }
                     else
                         return RedirectToAction("Principal", "Home");
