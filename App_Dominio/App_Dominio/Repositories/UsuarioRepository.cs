@@ -35,7 +35,7 @@ namespace App_Dominio.Repositories
         public string isAdmin { get; set; }
 
         [DataType(DataType.Password)]
-        [StringLength(20, ErrorMessage="A senha deve possuir no máximo 20 caracteres")]
+        [StringLength(20, ErrorMessage="A senha deve possuir no mínimo 6 dígitos e no máximo 20 dígitos", MinimumLength = 6)]
         public string senha { get; set; }
 
         [DataType(DataType.Password)]

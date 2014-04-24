@@ -244,6 +244,12 @@ namespace App_Dominio.Entidades
                             value.mensagem.Message = MensagemPadrao.Message(37).ToString();
                             value.mensagem.MessageType = MsgType.WARNING;
                         }
+                        else if (value.mensagem.MessageBase.ToUpper().Contains("UNIQUE KEY"))
+                        {
+                            value.mensagem.Code = 54;
+                            value.mensagem.Message = MensagemPadrao.Message(54).ToString();
+                            value.mensagem.MessageType = MsgType.WARNING;
+                        }
                         else
                         {
                             value.mensagem.Code = 44;
@@ -284,7 +290,8 @@ namespace App_Dominio.Entidades
                         System.Web.HttpContext web = System.Web.HttpContext.Current;
                         sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
 
-                        value.empresaId = sessaoCorrente.empresaId;
+                        if (sessaoCorrente != null)
+                            value.empresaId = sessaoCorrente.empresaId;
 
                         #region validar alteração
                         value.mensagem = this.Validate(value, Crud.ALTERAR);
@@ -831,9 +838,13 @@ namespace App_Dominio.Entidades
                         }
                         #endregion
                     }
+                    catch (App_DominioException ex)
+                    {
+                        value.mensagem = ex.Result;
+                    }
                     catch (ArgumentException ex)
                     {
-                        value.mensagem = new Validate() { Code = 17, Message = MensagemPadrao.Message(17).ToString(), MessageBase = ex.Message };
+                        value.mensagem = new Validate() { Code = 999, Message = MensagemPadrao.Message(999).ToString(), MessageBase = ex.Message };
                     }
                     catch (DbUpdateException ex)
                     {

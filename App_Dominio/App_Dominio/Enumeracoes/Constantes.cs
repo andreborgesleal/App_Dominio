@@ -191,6 +191,32 @@ namespace App_Dominio.Enumeracoes
         }
 
         /// <summary>
+        /// Estado Civil
+        /// </summary>
+        public enum EstadoCivil
+        {
+            [StringDescription("Solteiro")]
+            [StringValue("S")]
+            SOLTEIRO,
+            [StringDescription("Casado")]
+            [StringValue("C")]
+            CASADO,
+            [StringDescription("Divorciado")]
+            [StringValue("D")]
+            DIVORCIADO,
+            [StringDescription("Viúvo")]
+            [StringValue("V")]
+            VIUVO,
+            [StringDescription("União Estável")]
+            [StringValue("U")]
+            UNIAO_ESTAVEL,
+            [StringDescription("Outros")]
+            [StringValue("O")]
+            OUTROS
+        }
+
+
+        /// <summary>
         /// Tipo de Telefone
         /// </summary>
         public enum TipoTelefone

@@ -175,6 +175,28 @@ namespace App_Dominio.Enumeracoes
         }
         #endregion
 
+        #region DropDownList EstadoCivil
+        /// <summary>
+        /// Retorna os valores constantes do estado civil para uma seleção 
+        /// </summary>
+        /// <param name="selectedValue">Item da lista que receberá o foco inicial</param>
+        /// <param name="header">Informar o cabeçalho do dropdownlist. Exemplo: "Selecione...". Observação: Se não informado o dropdownlist não terá cabeçalho.</param>
+        /// <returns></returns>
+        public static IEnumerable<SelectListItem> EstadoCivil(string selectedValue = "", string header = "")
+        {
+            List<SelectListItem> drp = new List<SelectListItem>() { 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.SOLTEIRO.GetStringValue(), Text = Enumeradores.EstadoCivil.SOLTEIRO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.CASADO.GetStringValue(), Text = Enumeradores.EstadoCivil.CASADO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.DIVORCIADO.GetStringValue(), Text = Enumeradores.EstadoCivil.DIVORCIADO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.VIUVO.GetStringValue(), Text = Enumeradores.EstadoCivil.VIUVO.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.UNIAO_ESTAVEL.GetStringValue(), Text = Enumeradores.EstadoCivil.UNIAO_ESTAVEL.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.EstadoCivil.OUTROS.GetStringValue(), Text = Enumeradores.EstadoCivil.OUTROS.GetStringDescription() }
+            };
+
+            return Funcoes.SelectListEnum(drp, selectedValue, header);
+        }
+        #endregion
+
         #region DropDownList Sexo
         /// <summary>
         /// Retorna os valores constantes M ou F para uma seleção 

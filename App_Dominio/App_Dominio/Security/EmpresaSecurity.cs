@@ -281,7 +281,7 @@ namespace App_Dominio.Security
         #region Retorna a empresa do usuário da sessão corrente
         public Empresa getEmpresa()
         {
-            using (seguranca_db = seguranca_db ?? new SecurityContext())
+            using (seguranca_db = new SecurityContext())
             {
                 System.Web.HttpContext web = System.Web.HttpContext.Current;
                 if (_ValidarSessao(web.Session.SessionID))
