@@ -46,8 +46,8 @@ namespace App_Dominio.Security
             {
                 #region Recupera o usuário
                 senha = Criptografar(senha);
-                Usuario usu = (from u in seguranca_db.Usuarios join usg in seguranca_db.UsuarioGrupos on u equals usg.Usuario
-                               join g in seguranca_db.Grupos on usg.Grupo equals g
+                Usuario usu = (from u in seguranca_db.Usuarios join usg in seguranca_db.UsuarioGrupos on u.usuarioId equals usg.usuarioId
+                               join g in seguranca_db.Grupos on usg.grupoId equals g.grupoId
                                where u.login == usuario && u.senha == senha && u.situacao == "A" && g.sistemaId == sistemaId
                                select u).FirstOrDefault();
                 #endregion
