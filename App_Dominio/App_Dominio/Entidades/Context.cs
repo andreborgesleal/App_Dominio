@@ -47,11 +47,14 @@ namespace App_Dominio.Entidades
 
     }
 
-    public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R> where E : class where R : Repository where D : DbContext
+    public abstract class CrudContext<E, R, D> : Context<D>, ICrudContext<R>
+        where E : class
+        where R : Repository
+        where D : DbContext
     {
         public LogAuditoria logAuditoria { get; set; }
 
-        #region Métodos virtuais 
+        #region Métodos virtuais
         public abstract E MapToEntity(R value);
 
         public abstract R MapToRepository(E entity);
@@ -88,9 +91,9 @@ namespace App_Dominio.Entidades
                 if (displayName.ToLower() != "xml")
                 {
                     if (atributes[i].GetValue(entity) != null)
-                        notacao += "<Context name=\"" + displayName + "\" value=\"" + atributes[i].GetValue(entity).ToString().Replace("\"","'").Replace("<","[").Replace(">","]") + "\"></Context>\r\n";
+                        notacao += "<Context name=\"" + displayName + "\" value=\"" + atributes[i].GetValue(entity).ToString().Replace("\"", "'").Replace("<", "[").Replace(">", "]") + "\"></Context>\r\n";
                     else
-                        notacao += "<Context name=\"" + displayName + "\" value=\"\"></Context>\r\n";                
+                        notacao += "<Context name=\"" + displayName + "\" value=\"\"></Context>\r\n";
                 }
             }
 
@@ -107,7 +110,7 @@ namespace App_Dominio.Entidades
             {
                 _sistemaId = int.Parse(System.Configuration.ConfigurationManager.AppSettings["sistemaId"]);
                 _empresaId = int.Parse(System.Configuration.ConfigurationManager.AppSettings["empresaId"]);
-                _usuarioId = (from usu in seguranca_db.Usuarios 
+                _usuarioId = (from usu in seguranca_db.Usuarios
                               where usu.empresaId == _empresaId && usu.isAdmin == "S" && usu.situacao == "A"
                               select usu.usuarioId).FirstOrDefault();
                 _ip = System.Web.HttpContext.Current.Request.UserHostAddress;
@@ -119,7 +122,7 @@ namespace App_Dominio.Entidades
                 _empresaId = sessaoCorrente.empresaId;
                 _ip = sessaoCorrente.ip;
             }
-                
+
 
             int _transacaoId = (from t in seguranca_db.Transacaos where t.url.ToLower() == url.ToLower() && t.sistemaId == _sistemaId select t.transacaoId).FirstOrDefault();
 
@@ -133,7 +136,7 @@ namespace App_Dominio.Entidades
                 notacao = notacao
             };
             this.seguranca_db.Set<LogAuditoria>().Add(logAuditoria);
-            
+
             #endregion
         }
         #endregion
@@ -144,7 +147,7 @@ namespace App_Dominio.Entidades
         /// </summary>
         /// <param name="id"></param>
         /// <returns>Retorna uma instância do objeto repository a partir da chave primária</returns>
-        public R getObject(R key) 
+        public R getObject(R key)
         {
             using (db = getContextInstance())
             {
@@ -197,7 +200,7 @@ namespace App_Dominio.Entidades
                     {
                         System.Web.HttpContext web = System.Web.HttpContext.Current;
                         sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
-                        
+
                         if (sessaoCorrente != null)
                             value.empresaId = sessaoCorrente.empresaId;
 
@@ -445,7 +448,7 @@ namespace App_Dominio.Entidades
                     Crud op = Crud.INCLUIR;
 
                     if (Search(where, db) != null)
-                        op = Crud.ALTERAR;    
+                        op = Crud.ALTERAR;
 
                     #region validar alteração
                     value.mensagem = this.Validate(value, op);
@@ -512,7 +515,7 @@ namespace App_Dominio.Entidades
         #endregion
 
         #region Save
-        public Validate SaveCollection(IEnumerable<R> values, Expression<Func<E, bool>> where) 
+        public Validate SaveCollection(IEnumerable<R> values, Expression<Func<E, bool>> where)
         {
             Validate mensagem = new Validate();
 
@@ -627,10 +630,9 @@ namespace App_Dominio.Entidades
         }
     }
 
-    public abstract class CrudItem<R,D> : Context<D>, ICrudItemContext<R> 
+    public abstract class CrudItem<R, D> : Context<D>, ICrudItemContext<R>
         where R : Repository
         where D : DbContext
-
     {
         private IList<R> ListItem { get; set; }
 
@@ -816,9 +818,11 @@ namespace App_Dominio.Entidades
                             string _url = value.uri;
                             E entity = ExecProcess(value, operation);
                             db.SaveChanges();
+                            seguranca_db.SaveChanges();
+                            if (sessaoCorrente != null)
+                                value.empresaId = sessaoCorrente.empresaId;
                             value = MapToRepository(entity);
                             value.uri = _url;
-
                             // só deverá ser implementado se não for executar operações na conexão atual.
                             // caso contrário deverá ser feito dentro do método ExecProcess
                             if (operation == Crud.INCLUIR)
@@ -833,7 +837,6 @@ namespace App_Dominio.Entidades
 
                             #region Log de Auditoria
                             SaveLog(entity, _url);
-                            seguranca_db.SaveChanges();
                             #endregion
                         }
                         #endregion
@@ -888,8 +891,8 @@ namespace App_Dominio.Entidades
         }
         #endregion
 
-        public virtual Validate AfterInsert(R value) 
-        { 
+        public virtual Validate AfterInsert(R value)
+        {
             return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
         }
         public virtual Validate AfterUpdate(R value)
@@ -899,12 +902,12 @@ namespace App_Dominio.Entidades
         public virtual Validate AfterDelete(R value)
         {
             return new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString(), MessageType = MsgType.SUCCESS };
-        }   
+        }
     }
 
 
     public abstract class ExecContext<R, D> : Context<D>, IExecContext<R>
-        where R: Repository
+        where R : Repository
         where D : DbContext
     {
         public abstract R ExecProcess(R value, Crud operation);

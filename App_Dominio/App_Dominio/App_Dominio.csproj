@@ -64,10 +64,7 @@
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\net45\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="SendGridMail">
-      <HintPath>..\packages\SendGrid.2.1.1\lib\SendGridMail.dll</HintPath>
-    </Reference>
-    <Reference Include="Smtpapi">
-      <HintPath>..\packages\smtpapi.1.0.0\lib\Smtpapi.dll</HintPath>
+      <HintPath>..\packages\Sendgrid.2.1.1\lib\SendGridMail.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -110,10 +107,16 @@
     <Compile Include="Contratos\IReportRepository.cs" />
     <Compile Include="Contratos\ISecurity.cs" />
     <Compile Include="Contratos\IValidate.cs" />
+    <Compile Include="Component\ListViewRepository.cs" />
+    <Compile Include="Component\MiniCrud.cs" />
+    <Compile Include="Component\Repository.cs" />
+    <Compile Include="Component\SiteMap.cs" />
     <Compile Include="Controllers\ExecController.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controllers\MasterController.cs" />
+    <Compile Include="Controllers\MasterController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Controllers\ProcessController.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -126,11 +129,9 @@
     <Compile Include="Controllers\RootItemController.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Controllers\SuperController.cs" />
-    <Compile Include="Component\ListViewRepository.cs" />
-    <Compile Include="Component\MiniCrud.cs" />
-    <Compile Include="Component\Repository.cs" />
-    <Compile Include="Component\SiteMap.cs" />
+    <Compile Include="Controllers\SuperController.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Entidades\Alerta.cs" />
     <Compile Include="Entidades\App_DominioContext.cs" />
     <Compile Include="Entidades\Context.cs" />

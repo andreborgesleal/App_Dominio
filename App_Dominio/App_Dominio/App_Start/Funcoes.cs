@@ -426,6 +426,12 @@ namespace App_Dominio.Models
             return datas;
         }
 
+         public static string FormataNumero(decimal value)
+        {
+            return Decimal.Round(value, 2).ToString("##0.00");
+
+        }
+
 
     }
 
