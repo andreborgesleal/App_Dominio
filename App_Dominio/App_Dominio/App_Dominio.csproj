@@ -66,6 +66,9 @@
     <Reference Include="SendGridMail">
       <HintPath>..\packages\Sendgrid.2.1.1\lib\SendGridMail.dll</HintPath>
     </Reference>
+    <Reference Include="Smtpapi">
+      <HintPath>..\packages\smtpapi.1.0.0\lib\Smtpapi.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
