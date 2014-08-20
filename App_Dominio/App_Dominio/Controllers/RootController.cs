@@ -206,7 +206,7 @@ namespace App_Dominio.Controllers
                 {
                     if (s != null)
                         s.beforeEdit(ref value, model);
-                    else
+                    else if (collection != null)
                         BeforeEdit(ref value, model, collection);
 
                     value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
