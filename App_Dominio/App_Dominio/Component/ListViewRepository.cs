@@ -56,6 +56,9 @@ namespace App_Dominio.Component
         {
             using (db = getContextInstance())
             {
+                using (seguranca_db = new SecurityContext())
+                    sessaoCorrente = seguranca_db.Sessaos.Find(System.Web.HttpContext.Current.Session.SessionID);
+
                 return Bind(index, pageSize, param);
             }
         }

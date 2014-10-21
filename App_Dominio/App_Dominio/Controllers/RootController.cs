@@ -63,7 +63,7 @@ namespace App_Dominio.Controllers
                 R ret = SetCreate(value, getModel(), collection);
 
                 if (ret.mensagem.Code == 0)
-                    return RedirectToAction("Create");
+                    return AfterCreate(value, collection);
                 else
                     return View(ret);
             }
@@ -80,6 +80,12 @@ namespace App_Dominio.Controllers
         {
 
         }
+
+        public virtual ActionResult AfterCreate(R value, FormCollection collection)
+        {
+            return RedirectToAction("Create");
+        }
+
         public virtual R SetCreate(R value, ICrudContext<R> model, FormCollection collection, string breadCrumbText = "Inclusão", IBaseController<R> s = null)
         {
             if (ModelState.IsValid)
