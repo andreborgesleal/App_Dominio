@@ -232,5 +232,23 @@ namespace App_Dominio.Enumeracoes
             return Funcoes.SelectListEnum(drp, selectedValue, header);
         }
         #endregion
+
+        #region DropDownList Sexo
+        /// <summary>
+        /// Retorna os valores constantes PF ou PJ para uma seleção 
+        /// </summary>
+        /// <param name="selectedValue">Item da lista que receberá o foco inicial</param>
+        /// <param name="header">Informar o cabeçalho do dropdownlist. Exemplo: "Selecione...". Observação: Se não informado o dropdownlist não terá cabeçalho.</param>
+        /// <returns></returns>
+        public static IEnumerable<SelectListItem> TipoPessoa(string selectedValue = "", string header = "")
+        {
+            List<SelectListItem> drp = new List<SelectListItem>() { 
+                new SelectListItem() { Value = Enumeradores.TipoPessoa.FISICA.GetStringValue(), Text = Enumeradores.TipoPessoa.FISICA.GetStringDescription() }, 
+                new SelectListItem() { Value = Enumeradores.TipoPessoa.JURIDICA.GetStringValue(), Text = Enumeradores.TipoPessoa.JURIDICA.GetStringDescription() }
+            };
+
+            return Funcoes.SelectListEnum(drp, selectedValue, header);
+        }
+        #endregion
     }
 }
