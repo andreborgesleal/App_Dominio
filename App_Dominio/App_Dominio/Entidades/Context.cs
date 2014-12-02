@@ -54,6 +54,12 @@ namespace App_Dominio.Entidades
     {
         public LogAuditoria logAuditoria { get; set; }
 
+        protected E getEntityInstance()
+        {
+            Type typeInstance = typeof(E);
+            return (E)Activator.CreateInstance(typeInstance);
+        }
+
         #region Métodos virtuais
         public abstract E MapToEntity(R value);
 
