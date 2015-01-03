@@ -17,5 +17,6 @@ namespace App_Dominio.Repositories
         public string buttonType { get; set; }
         public string javaScriptFunction { get; set; }
         public string icon { get; set; }
+        public string size { get; set; }
     }
 }

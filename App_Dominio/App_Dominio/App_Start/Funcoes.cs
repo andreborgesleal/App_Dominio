@@ -426,13 +426,21 @@ namespace App_Dominio.Models
             return datas;
         }
 
-         public static string FormataNumero(decimal value)
+        public static string FormataNumero(decimal value)
         {
             return Decimal.Round(value, 2).ToString("##0.00");
 
         }
 
+        public static DateTime Brasilia()
+        {
+            // Verifica o fuso horário de brasília
+            DateTime dt = DateTime.UtcNow;
+            TimeZoneInfo zone = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+            DateTime brasilia = TimeZoneInfo.ConvertTimeFromUtc(dt, zone);
 
+            return brasilia;
+        }
     }
 
 }
