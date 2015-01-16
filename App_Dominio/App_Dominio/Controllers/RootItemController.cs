@@ -50,21 +50,23 @@ namespace App_Dominio.Controllers
         [AuthorizeFilter]
         public override ActionResult _Edit(M value, string breadCrumbText = null, IDictionary<string, string> text = null)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
-
-            value = getModel().getObject(value);
-            if (value == null)
+            if (ViewBag.ValidateRequest)
             {
-                Attention("ID não encontrado");
-                return RedirectToAction("Create");
+                value = getModel().getObject(value);
+                if (value == null)
+                {
+                    Attention("ID não encontrado");
+                    return RedirectToAction("Create");
+                }
+
+                if (TempData.Peek(getName()) != null)
+                    TempData.Remove(getName());
+                TempData.Add(getName(), value);
+
+                return View(GetEdit(value, breadCrumbText, text));
             }
-
-            if (TempData.Peek(getName()) != null)
-                TempData.Remove(getName());
-            TempData.Add(getName(), value);
-
-            return View(GetEdit(value, breadCrumbText, text));
+            else
+                return null;
         }
 
         public ActionResult _Detail(M value, string breadCrumbText = null, IDictionary<string, string> text = null)

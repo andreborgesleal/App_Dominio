@@ -8,6 +8,11 @@ namespace App_Dominio.Repositories
 {
     public class TypeaheadRepository : Repository
     {
+        /// <summary>
+        /// Nome que será exibido na listagem do Typeaahead. Ex: "Históricos"
+        /// </summary>
+        public string ListName { get; set;  }
+
         public string label { get; set; }
         /// <summary>
         /// Hidden Field. Ex: historicoId
@@ -45,7 +50,7 @@ namespace App_Dominio.Repositories
         /// <summary>
         /// Código e descrição que serão preenchidos como valores iniciais para o ID e para o Text. Ex: new SelectListItem() { Value = Model.EnquadramentoItem.centroCustoId.ToString(), Text = Model.EnquadramentoItem.descricao_centroCusto }
         /// </summary>
-        public System.Web.Mvc.SelectListItem values { get; set; }
+        public System.Web.Mvc.SelectItemsTypeahead values { get; set; }
         /// <summary>
         /// Informa se os botões de busca e limpar ficarão desabilitados. Normalmente usados na exclusão
         /// </summary>

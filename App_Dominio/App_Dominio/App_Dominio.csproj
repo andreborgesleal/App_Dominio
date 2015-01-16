@@ -217,6 +217,7 @@
     <Compile Include="Repositories\LogAuditoriaRepository.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Repositories\SelectItemsTypeahead.cs" />
     <Compile Include="Repositories\TransacaoRepository.cs">
       <SubType>Code</SubType>
     </Compile>

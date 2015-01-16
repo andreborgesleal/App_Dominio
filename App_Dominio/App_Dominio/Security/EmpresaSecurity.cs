@@ -1,6 +1,7 @@
 ﻿using App_Dominio.Contratos;
 using App_Dominio.Entidades;
 using App_Dominio.Enumeracoes;
+using App_Dominio.Models;
 using App_Dominio.Negocio;
 using App_Dominio.Repositories;
 using System;
@@ -103,7 +104,7 @@ namespace App_Dominio.Security
 
                     #region Validar Sessão
                     Sessao s = seguranca_db.Sessaos.Find(web.Session.SessionID);
-                    if (s != null && s.dt_desativacao == null && s.dt_atualizacao.AddMinutes(Timeout) >= DateTime.Now && s.usuarioId != usu.usuarioId)
+                    if (s != null && s.dt_desativacao == null && s.dt_atualizacao.AddMinutes(Timeout) >= Funcoes.Brasilia() && s.usuarioId != usu.usuarioId)
                     {
                         validate.Code = 201;
                         validate.Message = MensagemPadrao.Message(201).text;
@@ -124,8 +125,8 @@ namespace App_Dominio.Security
                             usuarioId = usu.usuarioId,
                             empresaId = usu.empresaId,
                             login = usu.login,
-                            dt_criacao = DateTime.Now,
-                            dt_atualizacao = DateTime.Now,
+                            dt_criacao = Funcoes.Brasilia(),
+                            dt_atualizacao = Funcoes.Brasilia(),
                             isOnline = "S",
                             ip = web.Request.UserHostAddress,
                             value1 = value1,
@@ -145,7 +146,7 @@ namespace App_Dominio.Security
                         sessao.empresaId = usu.empresaId;
                         sessao.login = usu.login;
                         sessao.dt_desativacao = null;
-                        sessao.dt_atualizacao = DateTime.Now;
+                        sessao.dt_atualizacao = Funcoes.Brasilia();
                         sessao.isOnline = "S";
                         sessao.ip = web.Request.UserHostAddress;
                         sessao.value1 = value1;
@@ -179,7 +180,7 @@ namespace App_Dominio.Security
             {
                 #region Validar Sessão do usuário
                 Sessao s = seguranca_db.Sessaos.Find(sessionId);
-                if (s == null || s.dt_desativacao != null || s.dt_atualizacao.AddMinutes(Timeout) < DateTime.Now)
+                if (s == null || s.dt_desativacao != null || s.dt_atualizacao.AddMinutes(Timeout) < Funcoes.Brasilia())
                     return false;
                 #endregion
             }
@@ -209,7 +210,7 @@ namespace App_Dominio.Security
                 {
                     #region Atualiza a sessão
                     sessaoCorrente = seguranca_db.Sessaos.Find(sessionId);
-                    sessaoCorrente.dt_atualizacao = DateTime.Now;
+                    sessaoCorrente.dt_atualizacao = Funcoes.Brasilia();
                     seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
                     seguranca_db.SaveChanges();
                     #endregion
@@ -238,6 +239,62 @@ namespace App_Dominio.Security
         }
         #endregion
 
+        #region Alterar Sessão
+        public Validate AlterarSessao(params object[] param)
+        {
+            Validate validate = new Validate() { Code = 0, Message = MensagemPadrao.Message(0).ToString() };
+            try
+            {
+                string value1 = param != null && param.Count() > 0 ? (string)param[0] : null;
+                string value2 = param != null && param.Count() > 1 ? (string)param[1] : null;
+                string value3 = param != null && param.Count() > 2 ? (string)param[2] : null;
+                string value4 = param != null && param.Count() > 3 ? (string)param[3] : null;
+
+                using (seguranca_db = new SecurityContext())
+                {
+                    System.Web.HttpContext web = System.Web.HttpContext.Current;
+
+                    #region Validar Sessão
+                    Sessao s = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                    if (s == null || s.dt_desativacao != null || s.dt_atualizacao.AddMinutes(Timeout) < Funcoes.Brasilia())
+                    {
+                        validate.Code = 201;
+                        validate.Message = MensagemPadrao.Message(201).text;
+                        validate.MessageBase = "Sessão Expirada.";
+                        return validate;
+                    }
+                    #endregion
+
+                    #region altera a sessao
+                    Sessao sessao = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                    sessao.dt_desativacao = null;
+                    sessao.dt_atualizacao = Funcoes.Brasilia();
+                    sessao.value1 = value1;
+                    sessao.value2 = value2;
+                    sessao.value3 = value3;
+                    sessao.value4 = value4;
+
+                    seguranca_db.Entry(sessao).State = System.Data.Entity.EntityState.Modified;
+
+                    seguranca_db.SaveChanges();
+                    validate.Field = web.Session.SessionID;
+                    #endregion
+                }
+
+            }
+            catch (DbEntityValidationException ex)
+            {
+                throw new App_DominioException(ex.Message, GetType().FullName);
+            }
+            catch (Exception ex)
+            {
+                throw new App_DominioException(ex.Message, GetType().FullName);
+            }
+            return validate;
+        }
+        #endregion
+
         public void EncerrarSessao(string sessionId)
         {
             try
@@ -248,8 +305,8 @@ namespace App_Dominio.Security
                     sessaoCorrente = seguranca_db.Sessaos.Find(sessionId);
                     if (sessaoCorrente != null)
                     {
-                        sessaoCorrente.dt_atualizacao = DateTime.Now;
-                        sessaoCorrente.dt_desativacao = DateTime.Now;
+                        sessaoCorrente.dt_atualizacao = Funcoes.Brasilia();
+                        sessaoCorrente.dt_desativacao = Funcoes.Brasilia();
                         seguranca_db.Entry(sessaoCorrente).State = System.Data.Entity.EntityState.Modified;
                         seguranca_db.SaveChanges();
                     }
@@ -743,8 +800,8 @@ namespace App_Dominio.Security
             {
                 value.alertaId = alertaId;
                 value = model.getObject(value);
-                
-                value.dt_leitura = DateTime.Now;
+
+                value.dt_leitura = Funcoes.Brasilia();
 
                 value = model.Update(value);
             }

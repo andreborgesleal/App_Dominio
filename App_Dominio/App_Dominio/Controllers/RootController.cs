@@ -386,6 +386,8 @@ namespace App_Dominio.Controllers
                 if (s != null)
                     s.beforeCreate(ref value, model);
 
+                value.uri = this.ControllerContext.Controller.GetType().Name.Replace("Controller", "") + "/" + this.ControllerContext.RouteData.Values["action"].ToString();
+
                 value = model.Insert(value);
                 if (value.mensagem.Code > 0)
                     throw new App_DominioException(value.mensagem);

@@ -157,14 +157,22 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
+
                 key.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
 
                 E entity = Find(key);
 
                 if (entity != null)
                 {
-                    R value = MapToRepository(entity);
-                    return value;
+                    using (seguranca_db = new SecurityContext())
+                    {
+                        System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+
+                        R value = MapToRepository(entity);
+
+                        return value;
+                    }
                 }
                 else
                     return null;
