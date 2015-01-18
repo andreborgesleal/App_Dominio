@@ -16,6 +16,10 @@ namespace App_Dominio.Controllers
         where P : ICrudItemContext<I>
     {
         #region Virtual methods
+        /// <summary>
+        /// Nome do objeto que será usado para identificar o TempData
+        /// </summary>
+        /// <returns></returns>
         public abstract string getName();
 
         public abstract M setRepositoryAfterError(M value, FormCollection collection);
@@ -81,35 +85,72 @@ namespace App_Dominio.Controllers
         [HttpPost]
         public override ActionResult Edit(M value, FormCollection collection)
         {
-            //if (AccessDenied(System.Web.HttpContext.Current.Session.SessionID))
-            //    return RedirectToAction("Index", "Home");
-
-            IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
-            ((IMasterRepository<I>)value).SetItems(x.GetItems());
-
-            M ret = SetEdit(value, getModel(), collection);
-
-            if (ret.mensagem.Code == 0)
+            if (ViewBag.ValidateRequest)
             {
-                BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
-                if (b.items.Count > 1)
+                IMasterRepository<I> x = GetMaster((IMasterRepository<I>)value);
+                ((IMasterRepository<I>)value).SetItems(x.GetItems());
+
+                M ret = SetEdit(value, getModel(), collection);
+
+                if (ret.mensagem.Code == 0)
                 {
-                    string[] split = b.items[b.items.Count - 2].queryString.Split('&');
-                    string _index = split[0].Replace("?index=", "");
-                    return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
+                    if (b.items.Count > 1)
+                    {
+                        string[] split = b.items[b.items.Count - 2].queryString.Split('&');
+                        //string _index = split[0].Replace("?index=", "");
+                        System.Web.Routing.RouteValueDictionary routValues = new System.Web.Routing.RouteValueDictionary();
+
+                        for (int z = 0; z <= split.Count() - 1; z++)
+                        {
+                            string[] p = split[z].Replace("?", "").Split('=');
+                            if (p.Count() == 2)
+                                routValues.Add(p[0], p[1]);
+                        }
+                        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, routValues);
+
+                        //return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                    }
+                    else
+                        return RedirectToAction("Principal", "Home");
                 }
                 else
-                    return RedirectToAction("Principal", "Home");
+                {
+                    value = (M)GetMaster((IMasterRepository<I>)value); // recupera os valores da sessão
+                    value = setRepositoryAfterError(value, collection); // preenche os lookups, dropdownslists etc 
+
+                    ((IMasterRepository<I>)ret).SetItem(((IMasterRepository<I>)value).GetItem());
+
+                    return View(ret);
+                }
+
+                //M ret = SetEdit(value, getModel(), collection);
+
+                //if (ret.mensagem.Code == 0)
+                //{
+                //    BreadCrumb b = (BreadCrumb)ViewBag.BreadCrumb;
+                //    if (b.items.Count > 1)
+                //    {
+                //        string[] split = b.items[b.items.Count - 2].queryString.Split('&');
+                //        string _index = split[0].Replace("?index=", "");
+                //        return RedirectToAction(b.items[b.items.Count - 2].actionName, b.items[b.items.Count - 2].controllerName, new { index = _index });
+                //    }
+                //    else
+                //        return RedirectToAction("Principal", "Home");
+                //}
+                //else
+                //{
+                //    value = (M)GetMaster((IMasterRepository<I>)value); // recupera os valores da sessão
+                //    value = setRepositoryAfterError(value, collection); // preenche os lookups, dropdownslists etc 
+
+                //    ((IMasterRepository<I>)ret).SetItem(((IMasterRepository<I>)value).GetItem());
+
+                //    return View(ret);
+                //}
             }
             else
-            {
-                value = (M)GetMaster((IMasterRepository<I>)value); // recupera os valores da sessão
-                value = setRepositoryAfterError(value, collection); // preenche os lookups, dropdownslists etc 
+                return null;
 
-                ((IMasterRepository<I>)ret).SetItem(((IMasterRepository<I>)value).GetItem());
-
-                return View(ret);
-            }
         }
 
         [AuthorizeFilter]
@@ -150,6 +191,12 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region CrudItem
+        public override void GetCreate(string breadCrumbText = "Inclusão")
+        {
+            base.GetCreate(breadCrumbText);
+            TempData.Remove(getName());
+        }
+
         protected P getModel(IList<I> list)
         {
             Type typeInstance = typeof(P);
