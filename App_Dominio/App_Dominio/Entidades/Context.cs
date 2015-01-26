@@ -157,25 +157,21 @@ namespace App_Dominio.Entidades
         {
             using (db = getContextInstance())
             {
-
-                key.empresaId = new EmpresaSecurity<App_DominioContext>().getSessaoCorrente().empresaId;
-
-                E entity = Find(key);
-
-                if (entity != null)
+                using (seguranca_db = new SecurityContext())
                 {
-                    using (seguranca_db = new SecurityContext())
+                    sessaoCorrente = new EmpresaSecurity<App_DominioContext>()._getSessaoCorrente(seguranca_db);
+                    if (sessaoCorrente == null)
+                        return null;
+                    key.empresaId = sessaoCorrente.empresaId;
+                    E entity = Find(key);
+                    if (entity != null)
                     {
-                        System.Web.HttpContext web = System.Web.HttpContext.Current;
-                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
-
                         R value = MapToRepository(entity);
-
                         return value;
                     }
+                    else
+                        return null;
                 }
-                else
-                    return null;
             }
         }
         #endregion
@@ -212,11 +208,12 @@ namespace App_Dominio.Entidades
                 {
                     try
                     {
-                        System.Web.HttpContext web = System.Web.HttpContext.Current;
-                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        //System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = new EmpresaSecurity<App_DominioContext>()._getSessaoCorrente(seguranca_db);
+                        if (sessaoCorrente == null)
+                            throw new ArgumentException("Sessão expirada. Faça um novo login");
 
-                        if (sessaoCorrente != null)
-                            value.empresaId = sessaoCorrente.empresaId;
+                        value.empresaId = sessaoCorrente.empresaId;
 
                         #region validar inclusão
                         value.mensagem = this.Validate(value, Crud.INCLUIR);
@@ -304,11 +301,12 @@ namespace App_Dominio.Entidades
                 {
                     try
                     {
-                        System.Web.HttpContext web = System.Web.HttpContext.Current;
-                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        //System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = new EmpresaSecurity<App_DominioContext>()._getSessaoCorrente(seguranca_db);
+                        if (sessaoCorrente == null)
+                            throw new ArgumentException("Sessão expirada. Faça um novo login");
 
-                        if (sessaoCorrente != null)
-                            value.empresaId = sessaoCorrente.empresaId;
+                        value.empresaId = sessaoCorrente.empresaId;
 
                         #region validar alteração
                         value.mensagem = this.Validate(value, Crud.ALTERAR);
@@ -387,8 +385,10 @@ namespace App_Dominio.Entidades
                 {
                     try
                     {
-                        System.Web.HttpContext web = System.Web.HttpContext.Current;
-                        sessaoCorrente = seguranca_db.Sessaos.Find(web.Session.SessionID);
+                        //System.Web.HttpContext web = System.Web.HttpContext.Current;
+                        sessaoCorrente = new EmpresaSecurity<App_DominioContext>()._getSessaoCorrente(seguranca_db);
+                        if (sessaoCorrente == null)
+                            throw new ArgumentException("Sessão expirada. Faça um novo login");
 
                         value.empresaId = sessaoCorrente.empresaId;
 

@@ -328,6 +328,12 @@ namespace App_Dominio.Security
             else
                 return null;
         }
+        public Sessao _getSessaoCorrente(SecurityContext seguranca_db)
+        {
+            this.seguranca_db = seguranca_db;
+            return _getSessaoCorrente();
+        }
+
         public Sessao getSessaoCorrente()
         {
             using (seguranca_db = new SecurityContext())
