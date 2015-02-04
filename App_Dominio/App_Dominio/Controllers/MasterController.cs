@@ -113,6 +113,8 @@ namespace App_Dominio.Controllers
         public abstract string getListName();
 
         public abstract ActionResult List(int? index, int? PageSize, string descricao = null);
+
+        public virtual bool ClearBreadCrumbOnBrowse() { return true;  }
         #endregion
 
         public virtual bool mustListOnLoad()
@@ -125,7 +127,7 @@ namespace App_Dominio.Controllers
         {
             if (ViewBag.ValidateRequest)
             {
-                BindBreadCrumb(getListName(), true);
+                BindBreadCrumb(getListName(), ClearBreadCrumbOnBrowse());
 
                 TempData.Remove("Controller");
                 TempData.Add("Controller", this.ControllerContext.RouteData.Values["controller"].ToString());

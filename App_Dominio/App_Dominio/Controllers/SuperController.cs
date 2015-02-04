@@ -213,7 +213,7 @@ namespace App_Dominio.Controllers
                 ViewBag.Header = header;
 
                 if (param != null && param.Count() > 0)
-                    return View(pagedList);
+                    return View(pagedList); 
                 else
                     return View("LOVModal", pagedList);
             }
