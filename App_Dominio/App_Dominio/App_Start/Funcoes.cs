@@ -157,7 +157,17 @@ namespace App_Dominio.Models
 
         }
 
-
+        public static DateTime? StringToDate(string value)
+        {
+            try
+            {
+                return Convert.ToDateTime(value.Substring(6, 4) + "-" + value.Substring(3, 2) + "-" + value.Substring(0, 2));
+            }
+            catch
+            {
+                return null;
+            }
+        }
         #endregion
 
         #region ValidaCPF e CNPJ
@@ -440,6 +450,19 @@ namespace App_Dominio.Models
             DateTime brasilia = TimeZoneInfo.ConvertTimeFromUtc(dt, zone);
 
             return brasilia;
+        }
+
+        /// <summary>
+        /// Calcula a diferença entre duas datas em dias
+        /// </summary>
+        /// <param name="data1">Menor data</param>
+        /// <param name="data2">Maior data</param>
+        /// <returns>Retorna um número inteiro correspondete a diferença entre a data2 - data1 (em dias)</returns>
+        public static int DateDiff(DateTime data1, DateTime data2)
+        {
+            // Calcula a diferença em dias entre duas datas
+            TimeSpan ts = data2 - data1;
+            return ts.Days;
         }
     }
 
