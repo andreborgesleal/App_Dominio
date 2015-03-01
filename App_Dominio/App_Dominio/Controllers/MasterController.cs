@@ -3,9 +3,11 @@ using App_Dominio.Contratos;
 using App_Dominio.Security;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 using System.Web.Mvc;
 
 namespace App_Dominio.Controllers
@@ -186,6 +188,59 @@ namespace App_Dominio.Controllers
             IPagedList pagedList = model.getPagedList(index, report, this.ControllerContext.RouteData.Values["controller"].ToString(), action, pageSize.Value, param);
             return pagedList;
         }
+        #endregion
+
+        #region Upload Files
+
+        public FilePathResult Image()
+        {
+            string filename = Request.Url.AbsolutePath.Replace("/ContaPagar/image", "");
+            string contentType = "";
+            var filePath = new FileInfo(Server.MapPath("~/Users_Data") + filename);
+
+            var index = filename.LastIndexOf(".") + 1;
+            var extension = filename.Substring(index).ToUpperInvariant();
+
+            // Fix for IE not handling jpg image types
+            contentType = string.Compare(extension, "JPG") == 0 ? "image/jpeg" : string.Format("image/{0}", extension);
+
+            return File(filePath.FullName, contentType);
+        }
+
+        [HttpPost]
+        public ContentResult UploadFiles()
+        {
+            var r = new List<UploadFilesResult>();
+            string newName = "";
+
+            foreach (string file in Request.Files)
+            {
+                HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
+                if (hpf.ContentLength == 0)
+                    continue;
+
+                #region verifica o tamanho do arquivo
+                if (hpf.ContentLength > int.Parse(System.Configuration.ConfigurationManager.AppSettings["tam_arquivo"])) // 1 mb
+                    return Content("{\"name\":\"" + newName + "\",\"type\":\"" + hpf.ContentType + "\",\"size\":\"" + string.Format("{0} bytes", hpf.ContentLength) + "\",\"nome_original\":\"" + hpf.FileName + "\",\"mensagem\":\"Tamanho de arquivo inválido\" }", "application/json");
+                    
+                #endregion
+
+                //string savedFileName = Path.Combine(Server.MapPath("~/Users_Data"), Path.GetFileName(hpf.FileName));
+                newName = String.Format("{0}" + new FileInfo(hpf.FileName).Extension, Guid.NewGuid().ToString());
+                string savedFileName = Path.Combine(Server.MapPath("~/Temp"), newName);
+                hpf.SaveAs(savedFileName);
+
+                r.Add(new UploadFilesResult()
+                {
+                    Name = hpf.FileName,
+                    Length = hpf.ContentLength,
+                    Type = hpf.ContentType
+                });
+            }
+            return Content("{\"name\":\"" + newName + "\",\"type\":\"" + r[0].Type + "\",\"size\":\"" + string.Format("{0} bytes", r[0].Length) + "\",\"nome_original\":\"" + r[0].Name + "\",\"mensagem\":\"Sucesso\" }", "application/json");
+        }
+
+
         #endregion
 
     }

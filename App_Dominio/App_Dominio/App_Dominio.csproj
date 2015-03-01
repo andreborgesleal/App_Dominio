@@ -126,10 +126,13 @@
   <ItemGroup>
     <Compile Include="App_Start\EnumerableExtensions.cs" />
     <Compile Include="App_Start\Funcoes.cs" />
+    <Compile Include="Component\Coluna.cs" />
+    <Compile Include="Component\EmpresaReceitaFederal.cs" />
     <Compile Include="Component\GravatarHtmlHelper.cs" />
     <Compile Include="Component\SendEmail.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Component\UploadFilesResult.cs" />
     <Compile Include="Contratos\IBindDropDownList.cs" />
     <Compile Include="Contratos\IBindDropDownListEnum.cs" />
     <Compile Include="Contratos\IController.cs" />
@@ -197,6 +200,10 @@
     <Compile Include="Enumeracoes\BindDropDownList.cs" />
     <Compile Include="Enumeracoes\Constantes.cs" />
     <Compile Include="Enumeracoes\MensagemPadrao.cs" />
+    <Compile Include="Infra\CookieAwareWebClient.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Infra\FormatarDados.cs" />
     <Compile Include="Negocio\AlertaModel.cs">
       <SubType>Code</SubType>
     </Compile>
