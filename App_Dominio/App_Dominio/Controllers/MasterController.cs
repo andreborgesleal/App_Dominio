@@ -191,21 +191,20 @@ namespace App_Dominio.Controllers
         #endregion
 
         #region Upload Files
+        //public FilePathResult Image()
+        //{
+        //    string filename = Request.Url.AbsolutePath.Replace("/ContaPagar/image", "");
+        //    string contentType = "";
+        //    var filePath = new FileInfo(Server.MapPath("~/Users_Data") + filename);
 
-        public FilePathResult Image()
-        {
-            string filename = Request.Url.AbsolutePath.Replace("/ContaPagar/image", "");
-            string contentType = "";
-            var filePath = new FileInfo(Server.MapPath("~/Users_Data") + filename);
+        //    var index = filename.LastIndexOf(".") + 1;
+        //    var extension = filename.Substring(index).ToUpperInvariant();
 
-            var index = filename.LastIndexOf(".") + 1;
-            var extension = filename.Substring(index).ToUpperInvariant();
+        //    // Fix for IE not handling jpg image types
+        //    contentType = string.Compare(extension, "JPG") == 0 ? "image/jpeg" : string.Format("image/{0}", extension);
 
-            // Fix for IE not handling jpg image types
-            contentType = string.Compare(extension, "JPG") == 0 ? "image/jpeg" : string.Format("image/{0}", extension);
-
-            return File(filePath.FullName, contentType);
-        }
+        //    return File(filePath.FullName, contentType);
+        //}
 
         [HttpPost]
         public ContentResult UploadFiles()
@@ -218,6 +217,11 @@ namespace App_Dominio.Controllers
                 HttpPostedFileBase hpf = Request.Files[file] as HttpPostedFileBase;
                 if (hpf.ContentLength == 0)
                     continue;
+
+                #region Verifica o tipo do arquivo - somente JPEG/JPG, PNG ou PDF
+                if (!"image/jpg|image/jpeg|image/png|image/bmp|application/pdf".ToLower().Contains(hpf.ContentType)) 
+                    return Content("{\"name\":\"" + newName + "\",\"type\":\"" + hpf.ContentType + "\",\"size\":\"" + string.Format("{0} bytes", hpf.ContentLength) + "\",\"nome_original\":\"" + hpf.FileName + "\",\"mensagem\":\"Tipo de arquivo inválido. Selecione um arquivo de imagem ou pdf.\" }", "application/json");
+                #endregion
 
                 #region verifica o tamanho do arquivo
                 if (hpf.ContentLength > int.Parse(System.Configuration.ConfigurationManager.AppSettings["tam_arquivo"])) // 1 mb
@@ -240,6 +244,33 @@ namespace App_Dominio.Controllers
             return Content("{\"name\":\"" + newName + "\",\"type\":\"" + r[0].Type + "\",\"size\":\"" + string.Format("{0} bytes", r[0].Length) + "\",\"nome_original\":\"" + r[0].Name + "\",\"mensagem\":\"Sucesso\" }", "application/json");
         }
 
+        public ContentResult DeleteFile(string fileName)
+        {
+            try
+            {
+                string arquivo = Path.Combine(Server.MapPath("~/Temp"), fileName);
+                FileInfo f = new FileInfo(arquivo);
+                f.Delete();
+            }
+            catch (FileNotFoundException ex)
+            {
+                return Content("{\"mensagem\":\"Arquivo não encontrado\" }", "application/json");
+            }
+            catch (DirectoryNotFoundException ex)
+            {
+                return Content("{\"mensagem\":\"Path não encontrado\" }", "application/json");
+            }
+            catch (IOException ex)
+            {
+                return Content("{\"mensagem\":\"" + ex.Message + "\" }", "application/json");
+            }
+            catch (Exception ex)
+            {
+                return Content("{\"mensagem\":\"Erro na exclusão do arquivo: " + ex.Message + "\" }", "application/json");
+            }
+
+            return Content("{\"mensagem\":\"Sucesso\" }", "application/json");
+        }
 
         #endregion
 
